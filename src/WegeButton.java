@@ -1,5 +1,3 @@
-package homework.wege.model;
-
 import javafx.scene.control.Button;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;

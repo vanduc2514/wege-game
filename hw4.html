@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+<title>CSDS 132: Homework Assignment 4</title>
+</head>
+
+<body>
+<h2>Programming Project 4</h2>
+<h3>Due Sunday, April 23 at 11:59pm</h3>
+
+<p><em><strong>IMPORTANT:</strong> Read the
+<strong>Do's and Dont's</strong>
+in the <strong>Course Honor Policy</strong>. </em>
+</p>
+
+
+<h3>I. Overview</h3>
+
+<p>The purpose of this homework is to give you practice designing and creating a complete program.</p>
+
+<hr>
+
+<h3>II. Code Readability (20% of your project grade)</h3>
+
+<p>To receive the full readability marks, your code must follow the following guideline:
+<ul>
+<li>All variables (fields, parameters, local variables) must be given appropriate and descriptive names.</li>
+<li>All variable and method names must start with a lowercase letter.  All class names must start with an uppercase letter.</li>
+<li>The class body should be organized so that all the fields are at the top of the file, the
+constructors are next, the non-static methods next, and the static methods at the bottom with the main method last.</li>
+<li>There should not be two statements on the same line.</li>
+<li>All code must be properly indented (see page 645 of the Lewis book for an example of good style).
+    The amount of indentation is up to you, but it should be at least 2 spaces, and it must be used
+    consistently throughout the code.</li>
+<li>You must be consistent in your use of {, }.  The closing } must be on its own line and indented
+the same amount as the line containing the opening {.</li>
+<li>There must be an empty line between each method.</li>
+<li>There must be a space separating each operator from its operands as well as a space after each comma.</li>
+<li>There must be a comment at the top of the file that <strong>is in proper JavaDoc format</strong> and
+includes both your name and a description of what the class represents.  The comment should include tags for the author.
+(See Appendix J of the Lewis book of pages 249-257 of the Evans and Flanagan book.)</li>
+<li>There must be a comment directly above each method (including constructors) that <strong>is in proper JavaDoc format</strong>
+ and states <em>what</em> task the method is doing, not how it is doing it.  The comment should include
+ tags for any parameters, return values and exceptions, and the tags should include appropriate comments
+ that indicate the purpose of the inputs, the value returned, and the meaning of the exceptions.</li>
+<li>There must be a comment directly above each field that, in one line, states what the field is storing.</li>
+<li>There must be a comment either above or to the right of each non-field variable indicating what the variable is storing.  Any comments placed to the right should be aligned so they start on the same column.</li>
+<li>There must be a comment above each loop that indicates the purpose of the loop.  Ideally, the comment would
+consist of any preconditions (if they exist) and the subgoal for the loop iteration.</li>
+<li>Any code that is complicated should have a short comment either above it or aligned to the right that
+explains the logic of the code.</li>
+</ul>
+</p>
+
+<hr>
+
+<h3>III. Program Testing (20% of your project grade)</h3>
+
+<p>You are to write a test report that indicates the <em>types</em> of tests needed to thoroughly test 
+your project.  The tests should demonstrate that all parts of your code behave correctly.  Any unit of your program involving conditional statements
+will need tests that go through each branch of the execution.  Any unit of your program involving loops will need tests that cover the
+"test 0, test 1, test many" and "test first, test middle, test last" guidelines.  Your testing report should
+<em>not</em> list the actual tests and results.</p>
+
+<p>You are to have a JUnit test class or classes that implement as many of the tests as you can.
+You should have comments, names, or other indicators in your JUnit tests that easily link the JUnit tests back to the testing report.</p>
+
+<p><em>The testing report must be separate from the JUnit class.</em> In most companies, the testing document
+will be written in a style that allows both programmers and non-programmers to read it and recognize whether all the
+needed test cases were included.</p>
+
+<p><strong>Note</strong> that you will not be able to (easily) test methods involving user input or screen output with JUnit.  For these parts of your program,
+your testing report should indicate the specific tests you did to test these routines.</p>
+
+<p><strong>Note</strong>: you should have parts of your program that implement the game play and <em>do not</em> use JavaFX gadgets.
+Separating the game play from the game display will let you create JUnit tests that do not involve JavaFX gadgets.</p>
+
+<p><em>Hint:</em> Make lots of (public) helper methods for each of the different parts of the game.  That will make it much easier to design tests for your game, and
+it will make the testing shorter!</p>
+
+<hr>
+
+<h3>IV. Java Programming (60% of your grade)</h3>
+
+<p>For this project you will implement the game <a href="https://boardgamegeek.com/boardgame/128214/wege">Wege</a>.  Wege was also released as <a href="https://boardgamegeek.com/boardgame/3404/legend-landlock">The Legend of Landlock</a>.</p>
+
+<h4>Rules of the game:</h4>
+
+<p>Wege, or Landlock, is a game for two players.  One player is "Land" and the other is "Water".
+The players take turns playing cards/tiles into a 6x6 grid to form a park.  If you are "Land", your goal is to have a connected land path touch
+as many sides of the park as possible.  If you are "Water", your goal is to create a connected stream of water that connects as many sides of the park as possible.
+</p>
+
+<p>
+You can also win points by blocking your opponent.  For "Land", you get bonus points for every pond you create (water that can't reach any side), and for "Water", you get bonus points for every island you create (a path that fails to reach any side).  There are also
+gnomes that wander the path or swim in the water, and you get points for as many of these you can get to "face" each other on the board.
+</p>
+
+<p>
+The game ends once a full 6x6 grid of tiles is played.
+</p>
+
+<p>
+Each player takes turns, and on their turn they draw a new card/tile and decide where to play it.
+There are 4 kinds of cards: water cards that depict a stream of water. Land cards that depict a path of land.  Cossack cards that
+depict neither paths nor streams, and bridge cards that depict crossing paths of land and streams of water.
+Some cards will have "gnomes" on them.  A gnome can either be in the water or on the land, and the gnome is always at the corner of the card.
+<ul> 
+<li>The first card played can go anywhere.</li>
+<li>Each additional card played must be placed adjacent to an existing card, either horizontally or vertically.</li>
+<li>The land and water on the card must match with the land/water of the card it is placed next to.  Water cannot connect to
+land and land cannot connect to water.</li>
+<li>There are special "bridge" cards.  With a bridge card, you can either play it like a regular card, or you can use it to
+replace an existing water or land card. But:
+<ul><li>A bridge card cannot replace a cossack card.</li>
+    <li>A bridge card cannot replace a land or water card if that card has a gnome AND that gnome is part of a group of "facing" gnomes.</li>
+</ul>
+<li>If you replace a card with a bridge card, the other player must then use that replaced card on their turn instead of drawing a new card.</li>
+</ul>
+</p>
+
+
+<h4>The <tt>WegeCard</tt> and <tt>WegeButton</tt> classes</h4>
+
+<p>Download the <tt>WegeCard</tt> and <tt>WegeButton</tt> classes and use them in your program.  You should not change these
+classes unless you are doing the second extra credit.</p>
+
+<p>The classes have JavaDoc comments so I recommend you run JavaDoc so that you can have a reference to all the public methods in those classes.  Here are some important ones:
+<ul>
+<li><strong>WegeCard:</strong>
+The WegeCard class represents a card in the game.<br>
+<ul><li><tt>getCardType:</tt> returns the type of card it is: LAND, WATER, BRIDGE, or COSSACK</li>
+    <li><tt>hasGnome:</tt> returns <tt>true</tt> if the card has a gnome on it.</li>
+    <li><tt>getGnomePosition:</tt> returns the location of the gnome on the card: TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT.</li>
+    <li><tt>isWater:</tt> takes a position (TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT) and returns  <tt>true</tt> if that corner of the card has water and <tt>false</tt> if that corner of the card has land.</li>
+    <li><tt>isLand:</tt> takes a position (TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT) and returns  <tt>true</tt> if that corner of the card has land and <tt>false</tt> if that corner of the card has water.</li>
+</ul>
+<li><strong>WegeButton:</strong>
+The WegeButton class is a JavaFX button that can display a WegeCard instance.<br>
+<ul><li><tt>getCard</tt>: returns the card displayed on this button or <tt>null</tt> if there is no card displayed.</li>
+    <li><tt>setCard</tt>: takes a WegeCard as input and displays it on this button or it you give it <tt>null</tt> it will clear the card.</li>
+    <li><tt>rotate</tt>: rotates the card on this button 90 degrees clockwise.</li>
+</ul>
+There are also methods to change the colors used for land/water/etc if you want or need better contrasting colors.</li>
+</ul>
+
+<h4>What you must do:</h4>
+<p>You are to create a class called <tt>Wege</tt> that is a JavaFX application. 
+</p>
+
+<h4>Create the board</h4>
+<p>You are to create a board by making a two dimensional grid of <tt>WegeButton</tt>s.
+You do this by using the <tt>GridPane</tt> <em>layout manager</em>.
+</p>
+<p>You should create a 2-dimensional array of <tt>WegeButton</tt>s and add them to the <tt>GridPane</tt>
+in the appropriate order so that the location of a button in the array corresponds to its location
+on the panel.  At the start of the game, none of the <tt>WegeButton</tt>s on the board should have a card.
+</p>
+
+<h4>Create the draw pile </h4>
+
+<p>You should create a linked list that stores the WegeCards.  The game has 40 cards as follows:
+<ul><li>12 land cards without gnomes</li>
+    <li>12 water cards without gnomes</li>
+    <li>3 land cards with a land gnome on the path</li>
+    <li>2 land cards with a water gnome on one of the water corners</li>
+    <li>3 water cards with a water gnome on the stream</li>
+    <li>2 water cards wtih a land gnome on one of the land corners</li>
+    <li>3 cossack cards </li>
+    <li>3 bridge cards</li>
+</ul>
+Place these cards into the linked list in random order.  (There are methods in the Java API that can help you.)
+</p>
+
+<p>Create a WegeButton along with some labels and place them into a FlowPanel in the bottom of the GUI.  The WegeButton will be used
+to draw and rotate the next card before playing it, and the labels will be there to remind players whose turn it is.
+The button should initially have no card.</p>
+
+<h4>Implement the game play </h4>
+
+<p>Write code so that the game does the following. Until the board is filled (every button has a card displayed),
+<ol>
+<li>If the "next card" button is empty, clicking on it gets the next WegeCard from the linked list (remove from front) and adds it to the 
+button.</li>
+<li>Clicking on the "next card" button while it is displaying a card will rotate that card 90 degrees.</li>
+<li>Clicking on a game board button while the "next card" button is empty will do nothing.</li>
+<li>Clicking on a game board button while the "next card" button is displaying a card move the card from the "next card" button to the clicked game board button, keeping the same orientation, only if it is legal to play the card at that square.</li>
+<li>If the move is legal, the "next card" button should now be empty and the turn should change to the next player.  A message
+should be displayed in one of the labels indicating whose turn it now is.</li>
+<li>If the move is not legal, the card should stay on the "next card" button and there is no change to the game board or to the player whose turn it is.</li>
+<li>If the move is a legal <em>replacement</em> of a land or water card with a bridge card, then the card on the board and the card in the "next card" button are swapped.  The "next card" button will not be empty after completing this move.</li>
+</ol>
+</p>
+
+<h4>Have the main method change the parameters of the game</h4>
+
+<p>The <tt>Wege</tt> class should have a <tt>main</tt> method that launches the Wege
+game.  With a <tt>main</tt> method, you should be able to play the game with the default
+parameters or to change them.  Typing
+<pre>java Wege</pre>
+in the Interactions pane should create a game with a 6x6 board and the 40 cards listed above.  We will also let the user
+change the size of the board and the cards in the deck. <br>
+<tt>java Wege</tt> should start a game with a 6x6 grid and the 40 cards listed <br>
+<tt>java Wege 7 5</tt> should start a game with a 7x5 grid and the 40 cards listed.
+If the new grid has significantly more or fewer tiles than the standard 36, increase or decrease the number of land and water cards
+(without gnomes) so that there are the same number of road and water cards, but at least 2 more total cards than there are tiles in the
+game. <br>
+<tt>java Wege 7 5 2</tt> should start a game with a 7x5 grid, 2 cossack cards, 2 bridge cards, 2 of each water and land cards with gnomes on the path corners and gnomes on the non-path corners.<br>
+<tt>java Wege 5</tt> should start a game with a 6x6 grid and 5 each of the specialty cards (cossack cards, bridge cards, each variation
+of a card with a gnome).</p>
+
+<p>
+If the user enters something other than realistic numbers, your code should
+do something appropriate, but not crash.
+</p>
+
+<h4>Some General Hints</h4>
+
+<p>There is a lot to do in this game so don't try to code everything at once!</p>
+<p>Create lots of helper methods.  Use inner classes.  Each helper method can be really small and do one task.  That will make it easier to handle the
+logic of the game, and you can then write JUnit tests for each helper method, and that will make it easier to test your game.</p>
+
+<hr>
+
+<h3>Extra Credit 1: (10% of the project grade)</h4>
+
+<p>Provide the following routine to calculate the scores of each player at the end of the game. The scoring rules are tricky so you should use the algorithm descibed below.</p>
+
+<p>Playing each cossack card is worth 1 point.  You will need a way to keep track of how many cossack cards each player drew and played.</p>
+<p>If an intersection of tiles has 2 gnomes, it is worth 2 points.  If it has 3 gnomes, it is worth 5 points, and if it has 4 gnomes, it is worth 8 points.  The points go to the water player if the intersection is in water, and the land player if it is in land.</p>
+
+<p>A player gets 4 points for each island or pond created (water or land that does not connect by paths or streams to the edge of the game board).  The land player gets 4 points for each pond and the water player gets 4 points for each island.</p>
+
+<p>If the player manages to connect all four sides of the game board by a single connected stream or path, they get 12 points.
+If they connect three of the four sides, they get 7 points, and if they connect two sides, they get 4 points. A stream/path that goes
+to the corner of the board can be used for either side of that corner, but not for both sides.</p>
+
+<p>The algorithm you should code is as follows:
+<ol>
+<li>Create a type <strong>Intersection</strong> to keep track of each intersection on the board. An intersection where the corners of the tiles connect. (Include the board corners as "intersections" even though there is only one tile there at that corner.)  The type should have an x and y coorinate so you know which intersection it
+refers to as well as a <em>visited</em> and a <em>completed</em> boolean attribute.  Each should be set to <tt>false</tt>.</li>
+<li>Create an Intersection type for each of intersections on your game.</li>
+<li>Create a linked list that is capable of storing intersections.</li>
+<li>Maintain a variable for each land and water player that keeps track of the maximum number of board edges that a single path or
+stream touches.  These variables should start out at 0.</li>
+<li>Repeat until every Intersection has the <em>completed</em> attribute set to true.
+<ol><li>Get an Intersection that still has <em>completed</em> set to false and add it to the front of the linked list. </li>
+    <li>Repeat until the linked list is empty.
+       <ol>
+          <li>Remove the intersection at the front of the linked list.</li>
+          <li>Set <em>visited</em> as true for that intersection.</li>
+          <li>Look at whether this is a land or water intersection</li>
+          <li>Count up the number of gnomes at that intersection and add the correcy points to the appropriate player's score.</li>
+          <li>For each card that makes up the intersection, if that card is a water card (for a water player), a land card (for a land player), or a bridge card (for either player),
+             look at the diagonal intersection on the other side of that card (i.e. following the path or stream).  If that intersection
+             has <em>visited</em> set to false, add that intersection to the front of the linked list.</li>
+          </ol>
+      <li>Once the list is empty, look for all the intersections with <em>visited</em> set to true but <em>completed</em> set to false.</li>
+      <li>For each of these intersections, set their <em>completed</em> to true.</li>
+      <li>While doing that, keep track of whether any of these intersections are on the top edge, bottom edge, left edge or right
+          edge of the board, or any of the 4 corners.</li>
+      <li>When you finish setting these intersections <em>completed</em> to true, determine how many of the edges this group of 
+          intersections touched.</li>
+      <li>If the number of edges touched is more than the current maximum listed for that player, record the new maximum number.</li>
+      <li>If no edges or corners of the board were touched by this group of intersections, immediately give 4 points to the opposing
+          player.</li>
+     </ol>
+     <li>Once all intersections are marked as <em>completed</em>, see what you have stored as the maximum number of edges touched for
+         each player, and award the appropriate number of points to that player.</li>
+     <li>Display the score, and do so in a way that explains how the players earned points.  For example, something like:
+<pre>
+   LAND EARNS:
+   3 sides connected = 7 points
+   2 ponds created = 8 points
+   0 intersections of 4 gnomes = 0 points
+   1 intersections of 3 gnomes = 5 points
+   1 intersections of 2 gnomes = 2 points
+   2 cossacks played = 2 points
+   TOTAL POINTS = 24
+</pre>
+</li>
+</ol>
+</p>
+
+<h3>Extra Credit 2: (up to 10% of the project grade)</h3>
+
+<p>Make the board more aesthetically appealing and/or make the game more enjoyable to play. The amount of extra credit
+awarded will be based on both the coding challenge and the creativity of your changes.
+You may need to hunt through the API in order to figure out how to add
+features to your game.</p>
+
+<p><strong>IMPORTANT:</strong> If you complete an extra credit, you must put a comment with your canvas submission indicating what you did.  Otherwise we will not grade the extra credit.</p>
+</body>
+
+</html>

@@ -1,7 +1,3 @@
-package homework.wege.game;
-
-import homework.wege.model.WegeCard;
-
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.function.Supplier;
@@ -51,14 +47,11 @@ public class WegeDeck {
 
     public static Supplier<WegeCard> cardSupplier(WegeCard.CardType cardType, GnomePos gnomePos) {
         if (gnomePos == null) return () -> new WegeCard(cardType, false, false);
-        switch (gnomePos) {
-            case CORNER:
-                return () -> new WegeCard(cardType, true, false);
-            case PATH:
-                return () -> new WegeCard(cardType, true, true);
-            default:
-                throw new IllegalArgumentException("A Gnome does have Pos");
-        }
+        return switch (gnomePos) {
+            case CORNER -> () -> new WegeCard(cardType, true, false);
+            case PATH -> () -> new WegeCard(cardType, true, true);
+            default -> throw new IllegalArgumentException("A Gnome does have Pos");
+        };
     }
 
     private enum GnomePos {

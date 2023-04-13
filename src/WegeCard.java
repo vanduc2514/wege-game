@@ -1,5 +1,3 @@
-package homework.wege.model;
-
 import javafx.geometry.Pos;
 import java.util.NoSuchElementException;
 
