@@ -16,9 +16,11 @@ public class WegeGame {
     // TODO: bind label with Next Card Button to automatically update when a new card is set.
     private final Label label = new Label();
 
+    private final Label gnomePos = new Label();
+
     private int firstLandPlaced;
 
-    private WegeButtonTracker wegeButtonTracker;
+//    private WegeBoard wegeBoard;
 
     public WegeGame(int row, int col) {
         wegeDeck = WegeDeck.createDefaultDeck();
@@ -28,51 +30,58 @@ public class WegeGame {
                 WegeCard nextCard = wegeDeck.drawFromFront();
                 nextCardButton.setCard(nextCard);
                 label.setText(nextCard.getCardType().name());
+                if (nextCard.hasGnome()) {
+                    label.setText(nextCard.getGnomePosition().name());
+                }
             } else {
                 nextCardButton.rotate();
             }
         });
         wegeBoard = createWegeBoard(row, col);
-        wegeButtonTracker = new WegeButtonTracker(wegeBoard);
+//        wegeBoard = new WegeBoard(wegeBoard);
     }
 
     public GridPane drawBoard() {
         GridPane gridPane = new GridPane();
-        FlowPane flowPane = new FlowPane(nextCardButton, label);
+        FlowPane flowPane = new FlowPane(nextCardButton, label, gnomePos);
 
         for (int row = 0; row < wegeBoard.length; row++) {
             for (int col = 0; col < wegeBoard[row].length; col++) {
                 WegeButton wegeBoardButton = this.wegeBoard[row][col];
-                wegeButtonTracker.trackWegeButtonPosition(wegeBoardButton, row, col);
                 wegeBoardButton.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
-                    if (firstLandPlaced != 2) {
-                        firstLandPlaced++;
-                        placeCard(wegeBoardButton, nextCardButton);
-                        return;
-                    };
-                    WegeCard currentCard = wegeBoardButton.getCard();
-                    WegeCard nextCard = nextCardButton.getCard();
-                    WegeCard.CardType nextCardType = nextCard.getCardType();
-                    if (nextCardType == WegeCard.CardType.BRIDGE) {
-                        if (currentCard != null && currentCard.getCardType() != WegeCard.CardType.COSSACK) {
-                            swapCard(wegeBoardButton, nextCardButton);
-                            return;
-                        }
-                    }
-                    List<WegeCard> adjacentCards = wegeButtonTracker.findAdjacentCards(wegeBoardButton);
-                    if (!adjacentCards.isEmpty()) {
-                        switch (nextCardType) {
-                            case COSSACK, BRIDGE -> placeCard(wegeBoardButton, nextCardButton);
-                            case WATER, LAND -> {
-                                for (WegeCard adjacent : adjacentCards) {
-                                    if (nextCardType == adjacent.getCardType()
-                                            || adjacent.getCardType() == WegeCard.CardType.BRIDGE
-                                            || adjacent.getCardType() == WegeCard.CardType.COSSACK) placeCard(wegeBoardButton, nextCardButton);
-                                }
-                            }
-                        }
-                    }
+                    wegeBoardButton.setCard(nextCardButton.getCard());
+                    nextCardButton.setCard(null);
                 });
+//                wegeBoard.trackWegeButtonPosition(wegeBoardButton, row, col);
+//                wegeBoardButton.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
+//                    if (firstLandPlaced != 2) {
+//                        firstLandPlaced++;
+//                        placeCard(wegeBoardButton, nextCardButton);
+//                        return;
+//                    };
+//                    WegeCard currentCard = wegeBoardButton.getCard();
+//                    WegeCard nextCard = nextCardButton.getCard();
+//                    WegeCard.CardType nextCardType = nextCard.getCardType();
+//                    if (nextCardType == WegeCard.CardType.BRIDGE) {
+//                        if (currentCard != null && currentCard.getCardType() != WegeCard.CardType.COSSACK) {
+//                            swapCard(wegeBoardButton, nextCardButton);
+//                            return;
+//                        }
+//                    }
+//                    List<WegeCard> adjacentCards = wegeBoard.findAdjacentCards(wegeBoardButton);
+//                    if (!adjacentCards.isEmpty()) {
+//                        switch (nextCardType) {
+//                            case COSSACK, BRIDGE -> placeCard(wegeBoardButton, nextCardButton);
+//                            case WATER, LAND -> {
+//                                for (WegeCard adjacent : adjacentCards) {
+//                                    if (nextCardType == adjacent.getCardType()
+//                                            || adjacent.getCardType() == WegeCard.CardType.BRIDGE
+//                                            || adjacent.getCardType() == WegeCard.CardType.COSSACK) placeCard(wegeBoardButton, nextCardButton);
+//                                }
+//                            }
+//                        }
+//                    }
+//                });
 
 
                 gridPane.add(wegeBoardButton, col, row);
