@@ -5,41 +5,24 @@ import javafx.scene.layout.GridPane;
 
 public class WegeBoard {
 
-    private final WegeDeck wegeDeck;
-
     private final WegeButton nextCardButton;
 
     // TODO: bind label with Next Card Button to automatically update when a new card is set.
     private final Label label = new Label();
 
-    private final Label gnomePos = new Label();
-
     // TODO: Create player, remove temporary solution
     private int firstLandPlaced;
 
-    private WegeGame wegeGame;
+    private final WegeGame wegeGame;
 
     public WegeBoard(int row, int col) {
-        wegeDeck = WegeDeck.createDefaultDeck();
-        nextCardButton = new WegeButton(100, 100);
-        nextCardButton.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
-            if (nextCardButton.getCard() == null) {
-                WegeCard nextCard = wegeDeck.drawFromFront();
-                nextCardButton.setCard(nextCard);
-                label.setText(nextCard.getCardType().name());
-                if (nextCard.hasGnome()) {
-                    label.setText(nextCard.getGnomePosition().name());
-                }
-            } else {
-                nextCardButton.rotate();
-            }
-        });
+        nextCardButton = createNextCardButton();
         wegeGame = new WegeGame(row, col);
     }
 
     public GridPane drawBoard() {
         GridPane gridPane = new GridPane();
-        FlowPane flowPane = new FlowPane(nextCardButton, label, gnomePos);
+        FlowPane flowPane = new FlowPane(nextCardButton, label);
         for (int row = 0; row < wegeGame.getHeight(); row++) {
             for (int col = 0; col < wegeGame.getWidth(); col++) {
                 WegeBoardButton boardButton = createBoardButton(row, col);
@@ -48,6 +31,21 @@ public class WegeBoard {
         }
         gridPane.add(flowPane, 0, wegeGame.getHeight() + 1, wegeGame.getWidth(), 1);
         return gridPane;
+    }
+
+    private WegeButton createNextCardButton() {
+        final WegeDeck wegeDeck = WegeDeck.createDefaultDeck();
+        final WegeButton nextCardButton = new WegeButton(100, 100);
+        nextCardButton.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
+            if (nextCardButton.getCard() == null) {
+                WegeCard nextCard = wegeDeck.drawFromFront();
+                nextCardButton.setCard(nextCard);
+                label.setText(nextCard.getCardType().name());
+            } else {
+                nextCardButton.rotate();
+            }
+        });
+        return nextCardButton;
     }
 
     private WegeBoardButton createBoardButton(int row, int col) {
@@ -87,8 +85,9 @@ public class WegeBoard {
      * @param boardButton the button on the playing board to swap a card
      */
     private void swapCard(WegeBoardButton boardButton) {
-        nextCardButton.setCard(boardButton.getCard());
+        WegeCard currentCardOnBoard = boardButton.getCard();
         setCardOnBoard(boardButton);
+        nextCardButton.setCard(currentCardOnBoard);
     }
 
     /**
