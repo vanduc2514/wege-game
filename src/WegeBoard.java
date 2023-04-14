@@ -87,8 +87,8 @@ public class WegeBoard {
      * @param boardButton the button on the playing board to swap a card
      */
     private void swapCard(WegeBoardButton boardButton) {
-        setCardOnBoard(boardButton);
         nextCardButton.setCard(boardButton.getCard());
+        setCardOnBoard(boardButton);
     }
 
     /**

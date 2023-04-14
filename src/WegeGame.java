@@ -224,48 +224,46 @@ public class WegeGame {
         switch (wegeCard.getGnomePosition()) {
             case TOP_LEFT -> {
                 WegeCard topCard = findTopCard(row, col);
-                if (topCard.hasGnome() && topCard.getGnomePosition() == Pos.BOTTOM_LEFT) {
-                    groupMembers.add(topCard);
-                }
+                if (isInGnomeGroup(topCard, Pos.BOTTOM_LEFT)) groupMembers.add(topCard);
                 WegeCard leftCard = findLeftCard(row, col);
-                if (leftCard.hasGnome() && topCard.getGnomePosition() == Pos.TOP_RIGHT) {
-                    groupMembers.add(leftCard);
-                }
+                if (isInGnomeGroup(leftCard, Pos.TOP_RIGHT)) groupMembers.add(leftCard);
             }
             case TOP_RIGHT -> {
                 WegeCard topCard = findTopCard(row, col);
-                if (topCard.hasGnome() && topCard.getGnomePosition() == Pos.BOTTOM_RIGHT) {
-                    groupMembers.add(topCard);
-                }
+                if (isInGnomeGroup(topCard, Pos.BOTTOM_RIGHT)) groupMembers.add(topCard);
                 WegeCard rightCard = findRightCard(row, col);
-                if (rightCard.hasGnome() && topCard.getGnomePosition() == Pos.TOP_LEFT) {
-                    groupMembers.add(rightCard);
-                }
+                if (isInGnomeGroup(rightCard, Pos.TOP_LEFT)) groupMembers.add(rightCard);
             }
             case BOTTOM_RIGHT -> {
                 WegeCard bottomCard = findBottomCard(row, col);
-                if (bottomCard.hasGnome() && bottomCard.getGnomePosition() == Pos.TOP_RIGHT) {
-                    groupMembers.add(bottomCard);
-                }
+                if (isInGnomeGroup(bottomCard, Pos.TOP_RIGHT)) groupMembers.add(bottomCard);
                 WegeCard rightCard = findRightCard(row, col);
-                if (rightCard.hasGnome() && bottomCard.getGnomePosition() == Pos.BOTTOM_LEFT) {
-                    groupMembers.add(rightCard);
-                }
+                if (isInGnomeGroup(rightCard, Pos.BOTTOM_LEFT)) groupMembers.add(rightCard);
             }
             case BOTTOM_LEFT -> {
                 WegeCard bottomCard = findBottomCard(row, col);
-                if (bottomCard.hasGnome() && bottomCard.getGnomePosition() == Pos.TOP_LEFT) {
-                    groupMembers.add(bottomCard);
-                }
+                if (isInGnomeGroup(bottomCard, Pos.TOP_LEFT)) groupMembers.add(bottomCard);
                 WegeCard leftCard = findLeftCard(row, col);
-                if (leftCard.hasGnome() && bottomCard.getGnomePosition() == Pos.BOTTOM_RIGHT) {
-                    groupMembers.add(leftCard);
-                }
+                if (isInGnomeGroup(leftCard, Pos.BOTTOM_RIGHT)) groupMembers.add(leftCard);
             }
         }
         // all null needs to be removed to avoid NullPointerException.
         groupMembers.removeAll(Collections.singletonList(null));
         return groupMembers;
+    }
+
+    /**
+     * Check if the relative card has is in a Gnome group.
+     *
+     * @param wegeCard the relative card.
+     * @param relativePosition the Gnome position to form a group.
+     * @return true if this card has a gnome, and it faces toward each other.
+     * Otherwise, return false.
+     */
+    private boolean isInGnomeGroup(WegeCard wegeCard, Pos relativePosition) {
+        if (wegeCard == null) return false;
+        if (!wegeCard.hasGnome()) return false;
+        return wegeCard.getGnomePosition() == relativePosition;
     }
 
     /**
