@@ -20,14 +20,44 @@ public class WegeBoard {
     private final Map<WegeCard, Pair<Integer, Integer>> cardLocations;
 
     /**
+     * The number of row on the playing board
+     */
+    private final int rows;
+
+    /**
+     * The number of column on the playing board
+     */
+    private final int cols;
+
+    /**
      * Create a new state of the Wege game board.
      *
-     * @param numberOfRows number of rows of this board.
-     * @param numberOfCols number of columns of this board.
+     * @param rows number of rows of this board.
+     * @param cols number of columns of this board.
      */
-    public WegeBoard(int numberOfRows, int numberOfCols) {
-        this.playingBoard = new WegeCard[numberOfRows][numberOfCols];
+    public WegeBoard(int rows, int cols) {
+        this.rows = rows;
+        this.cols = cols;
+        this.playingBoard = new WegeCard[rows][cols];
         this.cardLocations = new HashMap<>(playingBoard.length);
+    }
+
+    /**
+     * Get the height of the playing board.
+     * 
+     * @return the number of rows in the playing board.
+     */
+    public int getHeight() {
+        return rows;
+    }
+
+    /**
+     * Get the width of the playing board.
+     *
+     * @return the number of columns in the playing board.
+     */
+    public int getWidth() {
+        return cols;
     }
 
     /**
@@ -67,7 +97,7 @@ public class WegeBoard {
      * @return true if the next card can be placed on the target location. Otherwise, return false.
      */
     public boolean isLegalPlacement(WegeCard nextCard, int row, int col) {
-        List<WegeCard> adjacentCards = findAdjacentCards(new Pair<>(row, col));
+        List<WegeCard> adjacentCards = findAdjacentCards(row, col);
         switch (nextCard.getCardType()) {
             case COSSACK, BRIDGE -> {
                 if (!adjacentCards.isEmpty()) return true;
@@ -131,22 +161,23 @@ public class WegeBoard {
         Pair<Integer, Integer> currentCardLocation = cardLocations.get(wegeCard);
         if (currentCardLocation == null)
             throw new IllegalArgumentException("The given card is not played yet!");
-        return findAdjacentCards(currentCardLocation);
+        return findAdjacentCards(currentCardLocation.getKey(), currentCardLocation.getValue());
     }
 
     /**
-     * Find all adjacent cards for a given location.
+     * Find all adjacent cards for a given location (row, col).
      *
-     * @param location the location in the playing board.
+     * @param row the row on the playing board.
+     * @param col the column on the playing board.
      * @return all of {@link WegeCard} that is placed next to the given location.
      * If there is no card available, return an empty list.
      */
-    private List<WegeCard> findAdjacentCards(Pair<Integer, Integer> location) {
+    private List<WegeCard> findAdjacentCards(int row, int col) {
         List<WegeCard> adjacentCards = new ArrayList<>();
-        adjacentCards.add(findTopCard(location));
-        adjacentCards.add(findRightCard(location));
-        adjacentCards.add(findBottomCard(location));
-        adjacentCards.add(findLeftCard(location));
+        adjacentCards.add(findTopCard(row, col));
+        adjacentCards.add(findRightCard(row, col));
+        adjacentCards.add(findBottomCard(row, col));
+        adjacentCards.add(findLeftCard(row, col));
         // all null needs to be removed to avoid NullPointerException.
         adjacentCards.removeAll(Collections.singletonList(null));
         return adjacentCards;
@@ -164,102 +195,117 @@ public class WegeBoard {
      */
     public List<WegeCard> findGnomeGroupMembers(WegeCard wegeCard) {
         Pair<Integer, Integer> currentCardLocation = cardLocations.get(wegeCard);
-        if (currentCardLocation == null)
+        if (currentCardLocation == null) {
             throw new IllegalArgumentException("The given card is not played yet!");
-        try {
-            List<WegeCard> groupMembers = new ArrayList<>();
-            switch (wegeCard.getGnomePosition()) {
-                case TOP_LEFT -> {
-                    WegeCard topCard = findTopCard(currentCardLocation);
-                    if (topCard.hasGnome() && topCard.getGnomePosition() == Pos.BOTTOM_LEFT) {
-                        groupMembers.add(topCard);
-                    }
-                    WegeCard leftCard = findLeftCard(currentCardLocation);
-                    if (leftCard.hasGnome() && topCard.getGnomePosition() == Pos.TOP_RIGHT) {
-                        groupMembers.add(leftCard);
-                    }
-                }
-                case TOP_RIGHT -> {
-                    WegeCard topCard = findTopCard(currentCardLocation);
-                    if (topCard.hasGnome() && topCard.getGnomePosition() == Pos.BOTTOM_RIGHT) {
-                        groupMembers.add(topCard);
-                    }
-                    WegeCard rightCard = findRightCard(currentCardLocation);
-                    if (rightCard.hasGnome() && topCard.getGnomePosition() == Pos.TOP_LEFT) {
-                        groupMembers.add(rightCard);
-                    }
-                }
-                case BOTTOM_RIGHT -> {
-                    WegeCard bottomCard = findBottomCard(currentCardLocation);
-                    if (bottomCard.hasGnome() && bottomCard.getGnomePosition() == Pos.TOP_RIGHT) {
-                        groupMembers.add(bottomCard);
-                    }
-                    WegeCard rightCard = findRightCard(currentCardLocation);
-                    if (rightCard.hasGnome() && bottomCard.getGnomePosition() == Pos.BOTTOM_LEFT) {
-                        groupMembers.add(rightCard);
-                    }
-                }
-                case BOTTOM_LEFT -> {
-                    WegeCard bottomCard = findBottomCard(currentCardLocation);
-                    if (bottomCard.hasGnome() && bottomCard.getGnomePosition() == Pos.TOP_LEFT) {
-                        groupMembers.add(bottomCard);
-                    }
-                    WegeCard leftCard = findLeftCard(currentCardLocation);
-                    if (leftCard.hasGnome() && bottomCard.getGnomePosition() == Pos.BOTTOM_RIGHT) {
-                        groupMembers.add(leftCard);
-                    }
-                }
-            }
-            // all null needs to be removed to avoid NullPointerException.
-            groupMembers.removeAll(Collections.singletonList(null));
-            return groupMembers;
-        } catch (NoSuchElementException ignored) {
+        }
+        if (!wegeCard.hasGnome()) {
             throw new IllegalArgumentException("The given card does not have a Gnome!");
         }
+        return findGnomeGroupMembers(currentCardLocation.getKey(), currentCardLocation.getValue());
+    }
+
+    /**
+     * Find all card that is possible to form a Gnome group for the given card.
+     * Look for the direction where the Gnome is faced at.
+     *
+     * @param row the row on the playing board.
+     * @param col the column on the playing board.
+     * @return all members of the Gnome Group. If no member is found, return
+     * an empty list.
+     */
+    private List<WegeCard> findGnomeGroupMembers(int row, int col) {
+        List<WegeCard> groupMembers = new ArrayList<>();
+        WegeCard wegeCard = findWegeCard(row, col);
+        if (wegeCard == null) return groupMembers;
+        switch (wegeCard.getGnomePosition()) {
+            case TOP_LEFT -> {
+                WegeCard topCard = findTopCard(row, col);
+                if (topCard.hasGnome() && topCard.getGnomePosition() == Pos.BOTTOM_LEFT) {
+                    groupMembers.add(topCard);
+                }
+                WegeCard leftCard = findLeftCard(row, col);
+                if (leftCard.hasGnome() && topCard.getGnomePosition() == Pos.TOP_RIGHT) {
+                    groupMembers.add(leftCard);
+                }
+            }
+            case TOP_RIGHT -> {
+                WegeCard topCard = findTopCard(row, col);
+                if (topCard.hasGnome() && topCard.getGnomePosition() == Pos.BOTTOM_RIGHT) {
+                    groupMembers.add(topCard);
+                }
+                WegeCard rightCard = findRightCard(row, col);
+                if (rightCard.hasGnome() && topCard.getGnomePosition() == Pos.TOP_LEFT) {
+                    groupMembers.add(rightCard);
+                }
+            }
+            case BOTTOM_RIGHT -> {
+                WegeCard bottomCard = findBottomCard(row, col);
+                if (bottomCard.hasGnome() && bottomCard.getGnomePosition() == Pos.TOP_RIGHT) {
+                    groupMembers.add(bottomCard);
+                }
+                WegeCard rightCard = findRightCard(row, col);
+                if (rightCard.hasGnome() && bottomCard.getGnomePosition() == Pos.BOTTOM_LEFT) {
+                    groupMembers.add(rightCard);
+                }
+            }
+            case BOTTOM_LEFT -> {
+                WegeCard bottomCard = findBottomCard(row, col);
+                if (bottomCard.hasGnome() && bottomCard.getGnomePosition() == Pos.TOP_LEFT) {
+                    groupMembers.add(bottomCard);
+                }
+                WegeCard leftCard = findLeftCard(row, col);
+                if (leftCard.hasGnome() && bottomCard.getGnomePosition() == Pos.BOTTOM_RIGHT) {
+                    groupMembers.add(leftCard);
+                }
+            }
+        }
+        // all null needs to be removed to avoid NullPointerException.
+        groupMembers.removeAll(Collections.singletonList(null));
+        return groupMembers;
     }
 
     /**
      * Find the Top card of the current card.
      *
-     * @param currentCardLocation the location of the current card. Key is the row
-     *                            and Value is the col
+     * @param row the row on the playing board.
+     * @param col the column on the playing board.
      * @return a card on the playing board or null if the card can not be found.
      */
-    private WegeCard findTopCard(Pair<Integer, Integer> currentCardLocation) {
-        return findWegeCard(currentCardLocation.getKey() + 1, currentCardLocation.getValue());
+    private WegeCard findTopCard(int row, int col) {
+        return findWegeCard(row + 1, col);
     }
 
     /**
      * Find the Right card of the current card.
      *
-     * @param currentCardLocation the location of the current card. Key is the row
-     *                            and Value is the col
+     * @param row the row on the playing board.
+     * @param col the column on the playing board.
      * @return a card on the playing board or null if the card can not be found.
      */
-    private WegeCard findRightCard(Pair<Integer, Integer> currentCardLocation) {
-        return findWegeCard(currentCardLocation.getKey(), currentCardLocation.getValue() + 1);
+    private WegeCard findRightCard(int row, int col) {
+        return findWegeCard(row, col + 1);
     }
 
     /**
      * Find the Bottom card of the current card.
      *
-     * @param currentCardLocation the location of the current card. Key is the row
-     *                            and Value is the col
+     * @param row the row on the playing board.
+     * @param col the column on the playing board.
      * @return a card on the playing board or null if the card can not be found.
      */
-    private WegeCard findBottomCard(Pair<Integer, Integer> currentCardLocation) {
-        return findWegeCard(currentCardLocation.getKey() - 1, currentCardLocation.getValue());
+    private WegeCard findBottomCard(int row, int col) {
+        return findWegeCard(row - 1, col);
     }
 
     /**
      * Find the Left card of the current card.
      *
-     * @param currentCardLocation the location of the current card. Key is the row
-     *                            and Value is the col
+     * @param row the row on the playing board.
+     * @param col the column on the playing board.
      * @return a card on the playing board or null if the card can not be found.
      */
-    private WegeCard findLeftCard(Pair<Integer, Integer> currentCardLocation) {
-        return findWegeCard(currentCardLocation.getKey(), currentCardLocation.getValue() - 1);
+    private WegeCard findLeftCard(int row, int col) {
+        return findWegeCard(row, col - 1);
     }
 
     /**
