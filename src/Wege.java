@@ -10,8 +10,8 @@ public class Wege extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        WegeBoard wegeBoard = new WegeBoard(6 , 6);
-        Scene scene = new Scene(wegeBoard.drawBoard());
+        WegeGame wegeGame = new WegeGame(6 , 6);
+        Scene scene = new Scene(wegeGame.drawBoard());
         primaryStage.setScene(scene);
         primaryStage.show();
     }
