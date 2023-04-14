@@ -31,16 +31,92 @@ public class WegeBoard {
     }
 
     /**
-     * Track the location of a given {@link WegeCard} on the playing board.
+     * Place given {@link WegeCard} on the playing board.
      *
-     * @param wegeCard the {@link WegeCard} to be tracked.
+     * @param wegeCard the {@link WegeCard} to be placed.
      * @param row      the row of this card on the playing board.
      * @param col      the column of this card on the playing board.
      */
-    public void trackWegeCardLocation(WegeCard wegeCard, int row, int col) {
+    public void placeCard(WegeCard wegeCard, int row, int col) {
         playingBoard[row][col] = wegeCard;
         Pair<Integer, Integer> location = new Pair<>(row, col);
         cardLocations.put(wegeCard, location);
+    }
+
+    /**
+     * Check if the next card in the deck is able to place at a location (row, col) on the playing board.
+     * The rules are:
+     *
+     * <ul>
+     *     <li>
+     *         If the next card is a {@link WegeCard.CardType#BRIDGE}
+     *         or a {@link WegeCard.CardType#COSSACK}, it can be placed
+     *         next to any cards.
+     *     </li>
+     *     <li>
+     *         If the next card is a {@link WegeCard.CardType#LAND}
+     *         or a {@link WegeCard.CardType#WATER}, it can only placed
+     *         next to a card with the same type, or next to a
+     *         {@link WegeCard.CardType#BRIDGE}
+     *     </li>
+     * </ul>
+     *
+     * @param nextCard the next card in the deck.
+     * @param row the location (row) to place on the playing board.
+     * @param col the location (col) to place on the playing board.
+     * @return true if the next card can be placed on the target location. Otherwise, return false.
+     */
+    public boolean isLegalPlacement(WegeCard nextCard, int row, int col) {
+        List<WegeCard> adjacentCards = findAdjacentCards(new Pair<>(row, col));
+        switch (nextCard.getCardType()) {
+            case COSSACK, BRIDGE -> {
+                if (!adjacentCards.isEmpty()) return true;
+            }
+            case LAND, WATER -> {
+                for (WegeCard adjacentCard : adjacentCards) {
+                    WegeCard.CardType adjacentCardType = adjacentCard.getCardType();
+                    if (nextCard.getCardType() == adjacentCardType
+                            || adjacentCardType == WegeCard.CardType.BRIDGE)
+                        return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Check if the card {@link WegeCard.CardType#BRIDGE} can be swapped with a card on the playing board.
+     * The rules are:
+     *
+     * <ul>
+     *     <li>
+     *         If the card on the playing board is a {@link WegeCard.CardType#LAND}
+     *         or a {@link WegeCard.CardType#WATER}, it can be swapped as long as it does
+     *         not have a gnome or the gnome does not belong to a group.
+     *     </li>
+     *     <li>
+     *         If the card on the playing board is the same kind, it can be swapped.
+     *     </li>
+     *     <li>
+     *         If the card on the playing board is {@link WegeCard.CardType#COSSACK},
+     *         it cannot be swapped.
+     *     </li>
+     * </ul>
+     *
+     * @param cardOnBoard the card to be swapped
+     * @return true if the card on the playing board can be swapped. Otherwise, return false.
+     */
+    public boolean isLegalSwap(WegeCard cardOnBoard) {
+        switch (cardOnBoard.getCardType()) {
+            case LAND, WATER -> {
+                if (!cardOnBoard.hasGnome() || findGnomeGroupMembers(cardOnBoard).isEmpty())
+                    return true;
+            }
+            case BRIDGE -> {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -55,11 +131,22 @@ public class WegeBoard {
         Pair<Integer, Integer> currentCardLocation = cardLocations.get(wegeCard);
         if (currentCardLocation == null)
             throw new IllegalArgumentException("The given card is not played yet!");
+        return findAdjacentCards(currentCardLocation);
+    }
+
+    /**
+     * Find all adjacent cards for a given location.
+     *
+     * @param location the location in the playing board.
+     * @return all of {@link WegeCard} that is placed next to the given location.
+     * If there is no card available, return an empty list.
+     */
+    private List<WegeCard> findAdjacentCards(Pair<Integer, Integer> location) {
         List<WegeCard> adjacentCards = new ArrayList<>();
-        adjacentCards.add(findTopCard(currentCardLocation));
-        adjacentCards.add(findRightCard(currentCardLocation));
-        adjacentCards.add(findBottomCard(currentCardLocation));
-        adjacentCards.add(findLeftCard(currentCardLocation));
+        adjacentCards.add(findTopCard(location));
+        adjacentCards.add(findRightCard(location));
+        adjacentCards.add(findBottomCard(location));
+        adjacentCards.add(findLeftCard(location));
         // all null needs to be removed to avoid NullPointerException.
         adjacentCards.removeAll(Collections.singletonList(null));
         return adjacentCards;
@@ -123,7 +210,6 @@ public class WegeBoard {
                     }
                 }
             }
-            ;
             // all null needs to be removed to avoid NullPointerException.
             groupMembers.removeAll(Collections.singletonList(null));
             return groupMembers;
