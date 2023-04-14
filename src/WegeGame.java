@@ -3,9 +3,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BiConsumer;
 
 public class WegeGame {
 
@@ -15,9 +13,12 @@ public class WegeGame {
 
     private final WegeButton nextCardButton;
 
+    // TODO: bind label with Next Card Button to automatically update when a new card is set.
     private final Label label = new Label();
 
     private int firstLandPlaced;
+
+    private WegeButtonTracker wegeButtonTracker;
 
     public WegeGame(int row, int col) {
         wegeDeck = WegeDeck.createDefaultDeck();
@@ -31,21 +32,22 @@ public class WegeGame {
                 nextCardButton.rotate();
             }
         });
-        wegeBoard = createWegeLand(row, col);
+        wegeBoard = createWegeBoard(row, col);
+        wegeButtonTracker = new WegeButtonTracker(wegeBoard);
     }
 
     public GridPane drawBoard() {
         GridPane gridPane = new GridPane();
         FlowPane flowPane = new FlowPane(nextCardButton, label);
+
         for (int row = 0; row < wegeBoard.length; row++) {
             for (int col = 0; col < wegeBoard[row].length; col++) {
                 WegeButton wegeBoardButton = this.wegeBoard[row][col];
-                int finalRow = row;
-                int finalCol = col;
+                wegeButtonTracker.trackWegeButtonPosition(wegeBoardButton, row, col);
                 wegeBoardButton.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
                     if (firstLandPlaced != 2) {
                         firstLandPlaced++;
-                        placeCard(wegeBoardButton);
+                        placeCard(wegeBoardButton, nextCardButton);
                         return;
                     };
                     WegeCard currentCard = wegeBoardButton.getCard();
@@ -53,25 +55,26 @@ public class WegeGame {
                     WegeCard.CardType nextCardType = nextCard.getCardType();
                     if (nextCardType == WegeCard.CardType.BRIDGE) {
                         if (currentCard != null && currentCard.getCardType() != WegeCard.CardType.COSSACK) {
-                            nextCardButton.setCard(currentCard);
-                            wegeBoardButton.setCard(nextCard);
+                            swapCard(wegeBoardButton, nextCardButton);
                             return;
                         }
                     }
-                    List<WegeCard> adjacentCards = getAdjacentCards(finalRow, finalCol);
+                    List<WegeCard> adjacentCards = wegeButtonTracker.findAdjacentCards(wegeBoardButton);
                     if (!adjacentCards.isEmpty()) {
                         switch (nextCardType) {
-                            case COSSACK, BRIDGE -> placeCard(wegeBoardButton);
+                            case COSSACK, BRIDGE -> placeCard(wegeBoardButton, nextCardButton);
                             case WATER, LAND -> {
                                 for (WegeCard adjacent : adjacentCards) {
                                     if (nextCardType == adjacent.getCardType()
                                             || adjacent.getCardType() == WegeCard.CardType.BRIDGE
-                                            || adjacent.getCardType() == WegeCard.CardType.COSSACK) placeCard(wegeBoardButton);
+                                            || adjacent.getCardType() == WegeCard.CardType.COSSACK) placeCard(wegeBoardButton, nextCardButton);
                                 }
                             }
                         }
                     }
                 });
+
+
                 gridPane.add(wegeBoardButton, col, row);
             }
         }
@@ -79,29 +82,15 @@ public class WegeGame {
         return gridPane;
     }
 
-    private List<WegeCard> getAdjacentCards(int finalRow, int finalCol) {
-        List<WegeCard> adjacentButtons = new ArrayList<>();
-        BiConsumer<Integer, Integer> func = addAdjacentButtons(adjacentButtons);
-        func.accept(finalRow, finalCol - 1);
-        func.accept(finalRow, finalCol + 1);
-        func.accept(finalRow + 1, finalCol);
-        func.accept(finalRow - 1, finalCol);
-        return adjacentButtons;
-    }
-
-    private BiConsumer<Integer, Integer> addAdjacentButtons(List<WegeCard> buttonContainer) {
-        return (row, col) -> {
-            try {
-                WegeButton wegeButton = wegeBoard[row][col];
-                WegeCard card = wegeButton.getCard();
-                if (card != null) buttonContainer.add(card);
-            } catch (ArrayIndexOutOfBoundsException ignored) {
-            }
-        };
-    }
-
-    private WegeButton[][] createWegeLand(int row, int col) {
-        WegeButton[][] wegeLand = new WegeButton[row][col];
+    /**
+     * Create the playing board without the wege card
+     *
+     * @param rows number of rows for the playing board.
+     * @param cols number of columns for the playing board.
+     * @return a 2 dimension array which contains the wege button for the playing board.
+     */
+    private WegeButton[][] createWegeBoard(int rows, int cols) {
+        WegeButton[][] wegeLand = new WegeButton[rows][cols];
         for (int rowIdx = 0; rowIdx < wegeLand.length; rowIdx++) {
             for (int colIdx = 0; colIdx < wegeLand[rowIdx].length; colIdx++) {
                 WegeButton wegeBoardButton = new WegeButton(100, 100);
@@ -111,11 +100,31 @@ public class WegeGame {
         return wegeLand;
     }
 
-    private void placeCard(WegeButton wegeBoardButton) {
-        if (nextCardButton.getCard() != null) {
-            wegeBoardButton.setCard(nextCardButton.getCard());
+    /**
+     * Place a card to a board button then clear the card in the next card button.
+     *
+     * @param boardButton the button on the playing board to place a card.
+     * @param nextCardButton the next card button.
+     */
+    private void placeCard(WegeButton boardButton, WegeButton nextCardButton) {
+        WegeCard nextCard = nextCardButton.getCard();
+        if (nextCard != null) {
+            boardButton.setCard(nextCard);
             nextCardButton.setCard(null);
-            label.setText(null);
+        }
+    }
+
+    /**
+     * Swap a card from the board button with the next card button.
+     *
+     * @param boardButton the button on the playing board to swap a card
+     * @param nextCardButton the next card button.
+     */
+    private void swapCard(WegeButton boardButton, WegeButton nextCardButton) {
+        WegeCard nextCard = nextCardButton.getCard();
+        if (nextCard != null) {
+            nextCardButton.setCard(boardButton.getCard());
+            boardButton.setCard(nextCard);
         }
     }
 
