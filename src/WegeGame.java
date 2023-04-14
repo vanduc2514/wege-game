@@ -122,7 +122,7 @@ public class WegeGame {
      *     <li>
      *         If the card on the playing board is a {@link WegeCard.CardType#LAND}
      *         or a {@link WegeCard.CardType#WATER}, it can be swapped as long as it does
-     *         not have a gnome or the gnome does not belong to a group.
+     *         not have a gnome or the gnome does not belong to a facing group.
      *     </li>
      *     <li>
      *         If the card on the playing board is the same kind, it can be swapped.
@@ -131,12 +131,16 @@ public class WegeGame {
      *         If the card on the playing board is {@link WegeCard.CardType#COSSACK},
      *         it cannot be swapped.
      *     </li>
+     *     <li>
+     *         If there is no card existed in the playing board, it cannot be swapped.
+     *     </li>
      * </ul>
      *
      * @param cardOnBoard the card to be swapped
      * @return true if the card on the playing board can be swapped. Otherwise, return false.
      */
     public boolean isLegalSwap(WegeCard cardOnBoard) {
+        if (cardOnBoard == null) return false;
         switch (cardOnBoard.getCardType()) {
             case LAND, WATER -> {
                 if (!cardOnBoard.hasGnome() || findGnomeGroupMembers(cardOnBoard).isEmpty())

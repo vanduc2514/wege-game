@@ -2,7 +2,6 @@ import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
-import javafx.util.Pair;
 
 public class WegeBoard {
 
@@ -35,48 +34,15 @@ public class WegeBoard {
                 nextCardButton.rotate();
             }
         });
-//        wegeBoard = createWegeBoard(row, col);
         wegeGame = new WegeGame(row, col);
     }
 
     public GridPane drawBoard() {
         GridPane gridPane = new GridPane();
         FlowPane flowPane = new FlowPane(nextCardButton, label, gnomePos);
-
         for (int row = 0; row < wegeGame.getHeight(); row++) {
             for (int col = 0; col < wegeGame.getWidth(); col++) {
-                final Pair<Integer, Integer> boardLocation = new Pair<>(row, col);
-                WegeButton boardButton = new WegeButton(100, 100);
-                boardButton.addEventHandler(MouseEvent.MOUSE_CLICKED,
-                        new WegeButtonBoardHandler(new Pair<>(row, col)));
-//                wegeBoard.trackWegeButtonPosition(boardButton, row, col);
-//                boardButton.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
-
-//                    WegeCard currentCard = boardButton.getCard();
-//                    WegeCard nextCard = nextCardButton.getCard();
-//                    WegeCard.CardType nextCardType = nextCard.getCardType();
-//                    if (nextCardType == WegeCard.CardType.BRIDGE) {
-//                        if (currentCard != null && currentCard.getCardType() != WegeCard.CardType.COSSACK) {
-//                            swapCard(boardButton, nextCardButton);
-//                            return;
-//                        }
-//                    }
-//                    List<WegeCard> adjacentCards = wegeBoard.findAdjacentCards(boardButton);
-//                    if (!adjacentCards.isEmpty()) {
-//                        switch (nextCardType) {
-//                            case COSSACK, BRIDGE -> placeCard(boardButton, nextCardButton);
-//                            case WATER, LAND -> {
-//                                for (WegeCard adjacent : adjacentCards) {
-//                                    if (nextCardType == adjacent.getCardType()
-//                                            || adjacent.getCardType() == WegeCard.CardType.BRIDGE
-//                                            || adjacent.getCardType() == WegeCard.CardType.COSSACK) placeCard(boardButton, nextCardButton);
-//                                }
-//                            }
-//                        }
-//                    }
-//                });
-
-
+                WegeBoardButton boardButton = createBoardButton(row, col);
                 gridPane.add(boardButton, col, row);
             }
         }
@@ -84,50 +50,56 @@ public class WegeBoard {
         return gridPane;
     }
 
-    /**
-     * Create the playing board without the wege card
-     *
-     * @param rows number of rows for the playing board.
-     * @param cols number of columns for the playing board.
-     * @return a 2 dimension array which contains the wege button for the playing board.
-     */
-    private WegeButton[][] createWegeBoard(int rows, int cols) {
-        WegeButton[][] wegeLand = new WegeButton[rows][cols];
-        for (int rowIdx = 0; rowIdx < wegeLand.length; rowIdx++) {
-            for (int colIdx = 0; colIdx < wegeLand[rowIdx].length; colIdx++) {
-                WegeButton wegeBoardButton = new WegeButton(100, 100);
-                wegeLand[rowIdx][colIdx] = wegeBoardButton;
+    private WegeBoardButton createBoardButton(int row, int col) {
+        WegeBoardButton boardButton = new WegeBoardButton(row, col);
+        boardButton.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
+            if (nextCardButton.getCard() == null) return;
+            if (firstLandPlaced != 2) {
+                ++firstLandPlaced;
+                placeCard(boardButton);
+                return;
             }
-        }
-        return wegeLand;
+            WegeCard nextCard = nextCardButton.getCard();
+            WegeCard cardOnBoard = boardButton.getCard();
+            if (nextCard.getCardType() == WegeCard.CardType.BRIDGE
+                    && wegeGame.isLegalSwap(cardOnBoard)) {
+                swapCard(boardButton);
+            } else if (wegeGame.isLegalPlacement(nextCard, boardButton.row, boardButton.col)) {
+                placeCard(boardButton);
+            }
+        });
+        return boardButton;
     }
 
     /**
      * Place a card to a board button then clear the card in the next card button.
      *
      * @param boardButton the button on the playing board to place a card.
-     * @param nextCardButton the next card button.
      */
-    private void placeCard(WegeButton boardButton, WegeButton nextCardButton) {
-        WegeCard nextCard = nextCardButton.getCard();
-        if (nextCard != null) {
-            boardButton.setCard(nextCard);
-            nextCardButton.setCard(null);
-        }
+    private void placeCard(WegeBoardButton boardButton) {
+        setCardOnBoard(boardButton);
+        nextCardButton.setCard(null);
     }
 
     /**
      * Swap a card from the board button with the next card button.
      *
      * @param boardButton the button on the playing board to swap a card
-     * @param nextCardButton the next card button.
      */
-    private void swapCard(WegeButton boardButton, WegeButton nextCardButton) {
+    private void swapCard(WegeBoardButton boardButton) {
+        setCardOnBoard(boardButton);
+        nextCardButton.setCard(boardButton.getCard());
+    }
+
+    /**
+     * Set the next card to the playing board.
+     *
+     * @param boardButton the board button to set the next card.
+     */
+    private void setCardOnBoard(WegeBoardButton boardButton) {
         WegeCard nextCard = nextCardButton.getCard();
-        if (nextCard != null) {
-            nextCardButton.setCard(boardButton.getCard());
-            boardButton.setCard(nextCard);
-        }
+        boardButton.setCard(nextCard);
+        wegeGame.placeCard(nextCard, boardButton.row, boardButton.col);
     }
 
 }
