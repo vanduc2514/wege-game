@@ -7,14 +7,12 @@ import javafx.util.Pair;
 import java.util.*;
 
 /**
- * The Game Master of the game Wege. This master helps maintain the game and track
- * the {@link WegeCard} that are being played on the game board.
+ * The Game Master of the game Wege. This master keeps a {@link #playingBoard} to help
+ * maintain the game and track the {@link WegeCard} that are being played on the game board.
  */
 public class WegeGameMaster {
 
-    /**
-     * The 2 dimension Wege playing board.
-     */
+    /* The 2 dimension Wege playing board. */
     private final WegeCard[][] playingBoard;
 
     /**
@@ -24,44 +22,14 @@ public class WegeGameMaster {
     private final Map<WegeCard, Pair<Integer, Integer>> cardLocations;
 
     /**
-     * The number of row on the playing board
-     */
-    private final int rows;
-
-    /**
-     * The number of column on the playing board
-     */
-    private final int cols;
-
-    /**
      * Create a new master for the game Wege.
      *
      * @param rows number of rows for the playing board.
      * @param cols number of columns for the playing board.
      */
     public WegeGameMaster(int rows, int cols) {
-        this.rows = rows;
-        this.cols = cols;
         this.playingBoard = new WegeCard[rows][cols];
         this.cardLocations = new HashMap<>(playingBoard.length);
-    }
-
-    /**
-     * Get the height of the playing board.
-     * 
-     * @return the number of rows in the playing board.
-     */
-    public int getHeight() {
-        return rows;
-    }
-
-    /**
-     * Get the width of the playing board.
-     *
-     * @return the number of columns in the playing board.
-     */
-    public int getWidth() {
-        return cols;
     }
 
     /**
