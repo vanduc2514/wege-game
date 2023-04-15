@@ -63,7 +63,7 @@ public class WegeDeck {
      *     <li>3 bridge cards</li>
      * </ul>
      *
-     * @return a {@link WegeDeck} with default cards.
+     * @return a {@link WegeDeck} for the playing board.
      */
     public static WegeDeck createDefaultDeck() {
         WegeDeck playingDeck = new WegeDeck();
@@ -77,6 +77,30 @@ public class WegeDeck {
         playingDeck.addCardsToDeck(3, cardSupplier(WegeCard.CardType.BRIDGE, null));
         playingDeck.shuffle();
         return playingDeck;
+    }
+
+    /**
+     * Create a special deck contains only cossack cards, bridge cards, each
+     * variation of a card with a gnome. Each of them has the same amount of card.
+     *
+     * @param numberOfEachCard the number of each special card.
+     * @return a {@link WegeDeck} for the playing board.
+     */
+    public static WegeDeck createSpecialDeck(int numberOfEachCard) {
+        WegeDeck playingDeck = new WegeDeck();
+        playingDeck.addCardsToDeck(numberOfEachCard, cardSupplier(WegeCard.CardType.LAND, GnomePos.PATH));
+        playingDeck.addCardsToDeck(numberOfEachCard, cardSupplier(WegeCard.CardType.LAND, GnomePos.CORNER));
+        playingDeck.addCardsToDeck(numberOfEachCard, cardSupplier(WegeCard.CardType.WATER, GnomePos.PATH));
+        playingDeck.addCardsToDeck(numberOfEachCard, cardSupplier(WegeCard.CardType.LAND, GnomePos.CORNER));
+        playingDeck.addCardsToDeck(numberOfEachCard, cardSupplier(WegeCard.CardType.COSSACK, null));
+        playingDeck.addCardsToDeck(numberOfEachCard, cardSupplier(WegeCard.CardType.BRIDGE, null));
+        playingDeck.shuffle();
+        return playingDeck;
+    }
+
+    // TODO: implement
+    public static WegeDeck createCustomDeck(int rowsOfPlayingBoard, int colsOfPlayingBoard) {
+        return null;
     }
 
     /**

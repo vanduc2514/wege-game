@@ -3,6 +3,7 @@ package csds132.hw4.ui;
 import csds132.hw4.game.*;
 import csds132.hw4.model.WegeCard;
 import csds132.hw4.model.WegeDeck;
+import csds132.hw4.model.WegeGameSetting;
 import csds132.hw4.model.WegePlayer;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
@@ -15,7 +16,7 @@ import javafx.scene.layout.VBox;
 import java.util.LinkedList;
 
 /**
- * The view of Wege Game.
+ * The view of a Wege game.
  */
 public class WegeGame extends VBox {
 
@@ -26,10 +27,10 @@ public class WegeGame extends VBox {
     private final Label label = new Label();
 
     /* Track players of a Wege Game. */
-    private WegePlayerMonitor wegePlayerMonitor;
+    private final WegePlayerMonitor wegePlayerMonitor;
 
     /* The Deck contains wege cards for this game. */
-    private WegeDeck wegeDeck;
+    private final WegeDeck wegeDeck;
 
     /**
      * Create a new Wege Game.
@@ -41,7 +42,16 @@ public class WegeGame extends VBox {
     public WegeGame(int rows, int cols, WegeDeck wegeDeck) {
         this.wegeDeck = wegeDeck;
         wegePlayerMonitor = createPlayerMonitor(rows, cols);
-        createView(rows, cols);
+        createBoxView(rows, cols);
+    }
+
+    /**
+     * Create a new Wege Game.
+     *
+     * @param wegeGameSetting The setting
+     */
+    public WegeGame(WegeGameSetting wegeGameSetting) {
+        this(wegeGameSetting.rows(), wegeGameSetting.cols(), wegeGameSetting.deck());
     }
 
     /**
@@ -68,7 +78,7 @@ public class WegeGame extends VBox {
      * @param rows the number of row for the playing board of the Wege Game
      * @param cols the number of column for the playing board of the Wege Game
      */
-    private void createView(int rows, int cols) {
+    private void createBoxView(int rows, int cols) {
         GridPane playingBoard = createPlayingBoard(rows, cols);
         FlowPane flowPane = createBottomPane();
         ObservableList<Node> children = getChildren();
