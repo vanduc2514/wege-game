@@ -137,10 +137,12 @@ public class WegeGameMaster {
      *     </li>
      * </ul>
      *
-     * @param cardOnBoard the card to be swapped
+     * @param row the row of the card to be swapped on the playing board
+     * @param col the column of the card to be swapped on the playing board
      * @return true if the card on the playing board can be swapped. Otherwise, return false.
      */
-    public boolean isLegalSwap(WegeCard cardOnBoard) {
+    public boolean isLegalSwap(int row, int col) {
+        WegeCard cardOnBoard = findWegeCard(row, col);
         if (cardOnBoard == null) return false;
         switch (cardOnBoard.getCardType()) {
             case LAND, WATER -> {

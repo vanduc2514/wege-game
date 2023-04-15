@@ -24,8 +24,7 @@ public class WegePlayer {
 
     /**
      * This constructor is hidden to make sure a player must
-     * share the same {@link #wegeGameMaster}. Use
-     * {@link WegePlayerBuilder#createWegePlayerBuilder(WegeGameMaster)}
+     * share the same {@link #wegeGameMaster}. Use {@link WegePlayerBuilder}
      * to initialize a builder to build a Wege Player.
      */
     private WegePlayer(PlayerType playerType) {
@@ -64,8 +63,8 @@ public class WegePlayer {
      * Decide the next move and keep track all the cards played so far.
      *
      * @param nextCard the card that this player receive from the deck.
-     * @param row the row on the playing board to play a card.
-     * @param col the col on the playing board to play a card.
+     * @param row the row on the playing board to place the next card.
+     * @param col the col on the playing board to place the next card.
      * @return {@link PlayerMove} after a decision is made.
      */
     public PlayerMove playCard(WegeCard nextCard, int row, int col) {
@@ -75,11 +74,11 @@ public class WegePlayer {
         } else if (nextCard.getCardType() == WegeCard.CardType.BRIDGE
                 // ask the game master if this player
                 // can swap with the card on the board ?
-                && wegeGameMaster.isLegalSwap(nextCard)) {
+                && wegeGameMaster.isLegalSwap(row, col)) {
             playerMove = PlayerMove.SWAP;
             // ask the game master if this player
             // can place the card on the board ?
-        } else if (wegeGameMaster.isLegalPlacement(nextCard, row, col)){
+        } else if (wegeGameMaster.isLegalPlacement(nextCard, row, col)) {
             playerMove = PlayerMove.PLACE;
         }
         wegeGameMaster.trackCard(nextCard, row, col);
