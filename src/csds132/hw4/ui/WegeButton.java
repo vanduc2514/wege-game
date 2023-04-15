@@ -1,11 +1,10 @@
 package csds132.hw4.ui;
 
-import csds132.hw4.game.WegeCard;
+import csds132.hw4.model.WegeCard;
 import javafx.scene.control.Button;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
-import javafx.geometry.Dimension2D;
 import javafx.geometry.Pos;
 
 /**

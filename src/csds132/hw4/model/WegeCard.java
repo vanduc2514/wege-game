@@ -1,4 +1,4 @@
-package csds132.hw4.game;
+package csds132.hw4.model;
 
 import javafx.geometry.Pos;
 import java.util.NoSuchElementException;

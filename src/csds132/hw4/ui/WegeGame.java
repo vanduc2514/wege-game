@@ -1,6 +1,9 @@
 package csds132.hw4.ui;
 
 import csds132.hw4.game.*;
+import csds132.hw4.model.WegeCard;
+import csds132.hw4.model.WegeDeck;
+import csds132.hw4.model.WegePlayer;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.control.Label;

@@ -1,4 +1,4 @@
-package csds132.hw4.game;
+package csds132.hw4.model;
 
 import java.util.Collections;
 import java.util.LinkedList;

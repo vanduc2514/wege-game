@@ -1,6 +1,6 @@
 package csds132.hw4.game;
 
-import csds132.hw4.game.WegePlayer;
+import csds132.hw4.model.WegePlayer;
 
 import java.util.Deque;
 
