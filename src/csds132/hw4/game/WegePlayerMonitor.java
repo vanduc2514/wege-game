@@ -1,3 +1,7 @@
+package csds132.hw4.game;
+
+import csds132.hw4.game.WegePlayer;
+
 import java.util.Deque;
 
 public class WegePlayerMonitor {

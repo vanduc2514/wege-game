@@ -1,3 +1,4 @@
+import csds132.hw4.ui.WegeGame;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;

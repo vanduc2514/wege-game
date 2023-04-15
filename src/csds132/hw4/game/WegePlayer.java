@@ -1,3 +1,5 @@
+package csds132.hw4.game;
+
 import java.util.Deque;
 import java.util.LinkedList;
 
