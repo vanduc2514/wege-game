@@ -8,51 +8,45 @@ public class WegeDeck {
 
     private final LinkedList<WegeCard> cards;
 
-    private WegeDeck(LinkedList<WegeCard> cards) {
-        this.cards = cards;
+    public WegeDeck() {
+        this.cards = new LinkedList<>();
     }
 
-    public WegeDeck addCardToDeck(
+    private void addCardsToDeck(
             int numberOfCards,
             Supplier<WegeCard> wegeCardSupplier) {
         for (int i = 0; i < numberOfCards; i++) {
             cards.add(wegeCardSupplier.get());
         }
-        return this;
     }
 
-    public WegeDeck shuffle() {
+    public void shuffle() {
         Collections.shuffle(cards);
-        return this;
     }
 
     public WegeCard drawFromFront() {
         return cards.pop();
     }
 
-    public static WegeDeck createEmptyDeck() {
-        return new WegeDeck(new LinkedList<>());
-    }
-
     public static WegeDeck createDefaultDeck() {
-        return createEmptyDeck()
-                .addCardToDeck(12, cardSupplier(WegeCard.CardType.LAND, null))
-                .addCardToDeck(12, cardSupplier(WegeCard.CardType.WATER, null))
-                .addCardToDeck(3, cardSupplier(WegeCard.CardType.LAND, GnomePos.PATH))
-                .addCardToDeck(2, cardSupplier(WegeCard.CardType.LAND, GnomePos.CORNER))
-                .addCardToDeck(3, cardSupplier(WegeCard.CardType.WATER, GnomePos.PATH))
-                .addCardToDeck(2, cardSupplier(WegeCard.CardType.LAND, GnomePos.CORNER))
-                .addCardToDeck(3, cardSupplier(WegeCard.CardType.COSSACK, null))
-                .addCardToDeck(3, cardSupplier(WegeCard.CardType.BRIDGE, null))
-                .shuffle();
+        WegeDeck playingDeck = new WegeDeck();
+        playingDeck.addCardsToDeck(12, cardSupplier(WegeCard.CardType.LAND, null));
+        playingDeck.addCardsToDeck(12, cardSupplier(WegeCard.CardType.WATER, null));
+        playingDeck.addCardsToDeck(3, cardSupplier(WegeCard.CardType.LAND, GnomePos.PATH));
+        playingDeck.addCardsToDeck(2, cardSupplier(WegeCard.CardType.LAND, GnomePos.CORNER));
+        playingDeck.addCardsToDeck(3, cardSupplier(WegeCard.CardType.WATER, GnomePos.PATH));
+        playingDeck.addCardsToDeck(2, cardSupplier(WegeCard.CardType.LAND, GnomePos.CORNER));
+        playingDeck.addCardsToDeck(3, cardSupplier(WegeCard.CardType.COSSACK, null));
+        playingDeck.addCardsToDeck(3, cardSupplier(WegeCard.CardType.BRIDGE, null));
+        playingDeck.shuffle();
+        return playingDeck;
     }
 
-    public static Supplier<WegeCard> cardSupplier(WegeCard.CardType cardType, GnomePos gnomePos) {
+    private static Supplier<WegeCard> cardSupplier(WegeCard.CardType cardType, GnomePos gnomePos) {
         if (gnomePos == null) return () -> new WegeCard(cardType, false, false);
         return switch (gnomePos) {
             case CORNER -> () -> new WegeCard(cardType, true, false);
             case PATH -> () -> new WegeCard(cardType, true, true);
-            default -> throw new IllegalArgumentException("A Gnome does have Pos");
         };
     }
 
