@@ -9,14 +9,16 @@ import java.util.LinkedList;
  */
 public class WegePlayer {
 
-    /**
-     * Wege Game Master help the player checking the game rules.
-     */
+    /* The possible moves of a player. */
+    public enum PlayerMove {PLACE, SWAP}
+
+    /* The possible types player of the Wege Game. */
+    public enum PlayerType {LAND, WATER}
+
+    /* Wege Game Master help the player checking the game rules. */
     private static WegeGameMaster wegeGameMaster;
 
-    /**
-     * Each player needs to have a type.
-     */
+    /* The type of this player. */
     private final PlayerType playerType;
 
     /**
@@ -67,7 +69,8 @@ public class WegePlayer {
      * @param nextCard the card that this player receive from the deck.
      * @param row the row on the playing board to place the next card.
      * @param col the col on the playing board to place the next card.
-     * @return {@link PlayerMove} after a decision is made.
+     * @return {@link PlayerMove} after a decision is made. or return null
+     * if this player move is illegal.
      */
     public PlayerMove playCard(WegeCard nextCard, int row, int col) {
         PlayerMove playerMove = null;
@@ -88,11 +91,4 @@ public class WegePlayer {
         return playerMove;
     }
 
-    public enum PlayerMove {
-        PLACE, SWAP
-    }
-
-    public enum PlayerType {
-        LAND, WATER
-    }
 }
