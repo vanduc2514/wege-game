@@ -1,3 +1,4 @@
+import csds132.hw4.model.WegeDeck;
 import csds132.hw4.ui.WegeGame;
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -11,7 +12,8 @@ public class Wege extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        Scene scene = new Scene(new WegeGame(6 , 6));
+        WegeDeck defaultDeck = WegeDeck.createDefaultDeck();
+        Scene scene = new Scene(new WegeGame(6 , 6, defaultDeck));
         primaryStage.setScene(scene);
         primaryStage.show();
     }

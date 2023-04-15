@@ -28,13 +28,18 @@ public class WegeGame extends VBox {
     /* Track players of a Wege Game. */
     private WegePlayerMonitor wegePlayerMonitor;
 
+    /* The Deck contains wege cards for this game. */
+    private WegeDeck wegeDeck;
+
     /**
      * Create a new Wege Game.
      *
-     * @param rows the number of row for the playing board of the Wege Game
-     * @param cols the number of column for the playing board of the Wege Game
+     * @param rows the number of row for the playing board for this game.
+     * @param cols the number of column for the playing board for this game.
+     * @param wegeDeck the dek contains wege cards for this game.
      */
-    public WegeGame(int rows, int cols) {
+    public WegeGame(int rows, int cols, WegeDeck wegeDeck) {
+        this.wegeDeck = wegeDeck;
         wegePlayerMonitor = createPlayerMonitor(rows, cols);
         createView(rows, cols);
     }
@@ -110,8 +115,7 @@ public class WegeGame extends VBox {
      * @return a {@link WegeButton} initially display the first card from the deck.
      */
     private WegeButton createNextCardButton() {
-        final WegeDeck wegeDeck = WegeDeck.createDefaultDeck();
-        final WegeButton nextCardButton = new WegeButton(100, 100);
+        WegeButton nextCardButton = new WegeButton(100, 100);
         WegeCard firstCard = wegeDeck.drawFromFront();
         nextCardButton.setCard(firstCard);
         nextCardButton.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
