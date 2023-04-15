@@ -53,11 +53,9 @@ public class WegePlayer {
          * sure to share the game master to all of the {@link WegePlayer} that it builds.
          *
          * @param wegeGameMaster the {@link WegeGameMaster} which helps track the game rules.
-         * @return a builder which can be used again for building a new player
          */
-        public static WegePlayerBuilder createWegePlayerBuilder(WegeGameMaster wegeGameMaster) {
+        public WegePlayerBuilder(WegeGameMaster wegeGameMaster) {
             WegePlayer.wegeGameMaster = wegeGameMaster;
-            return new WegePlayerBuilder();
         }
 
     }

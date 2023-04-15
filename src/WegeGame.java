@@ -3,6 +3,8 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 
+import java.util.LinkedList;
+
 public class WegeGame {
 
     private final WegeButton nextCardButton;
@@ -10,26 +12,40 @@ public class WegeGame {
     // TODO: bind label with Next Card Button to automatically update when a new card is set.
     private final Label label = new Label();
 
-    // TODO: Create player, remove temporary solution
-    private int firstLandPlaced;
+    private final WegePlayerMonitor wegePlayerMonitor;
 
-    private final WegeGameMaster wegeGameMaster;
+    /**
+     * The rows of the playing board.
+     */
+    private final int rows;
 
-    public WegeGame(int row, int col) {
+    /**
+     * The cols of the playing board.
+     */
+    private final int cols;
+
+    public WegeGame(int rows, int cols) {
         nextCardButton = createNextCardButton();
-        wegeGameMaster = new WegeGameMaster(row, col);
+        WegeGameMaster wegeGameMaster = new WegeGameMaster(rows, cols);
+        WegePlayer.WegePlayerBuilder wegePlayerBuilder = new WegePlayer.WegePlayerBuilder(wegeGameMaster);
+        LinkedList<WegePlayer> players = new LinkedList<>();
+        players.add(wegePlayerBuilder.buildPlayer(WegePlayer.PlayerType.LAND));
+        players.add(wegePlayerBuilder.buildPlayer(WegePlayer.PlayerType.WATER));
+        wegePlayerMonitor = new WegePlayerMonitor(players);
+        this.rows = rows;
+        this.cols = cols;
     }
 
     public GridPane drawBoard() {
         GridPane gridPane = new GridPane();
         FlowPane flowPane = new FlowPane(nextCardButton, label);
-        for (int row = 0; row < wegeGameMaster.getHeight(); row++) {
-            for (int col = 0; col < wegeGameMaster.getWidth(); col++) {
+        for (int row = 0; row < this.rows; row++) {
+            for (int col = 0; col < this.cols; col++) {
                 WegeBoardButton boardButton = createBoardButton(row, col);
                 gridPane.add(boardButton, col, row);
             }
         }
-        gridPane.add(flowPane, 0, wegeGameMaster.getHeight() + 1, wegeGameMaster.getWidth(), 1);
+        gridPane.add(flowPane, 0, rows + 1, rows, 1);
         return gridPane;
     }
 
@@ -52,18 +68,13 @@ public class WegeGame {
         WegeBoardButton boardButton = new WegeBoardButton(row, col);
         boardButton.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
             if (nextCardButton.getCard() == null) return;
-            if (firstLandPlaced != 2) {
-                ++firstLandPlaced;
-                placeCard(boardButton);
-                return;
-            }
+            WegePlayer currentPlayer = wegePlayerMonitor.getNextPlayer();
             WegeCard nextCard = nextCardButton.getCard();
-            WegeCard cardOnBoard = boardButton.getCard();
-            if (nextCard.getCardType() == WegeCard.CardType.BRIDGE
-                    && wegeGameMaster.isLegalSwap(cardOnBoard)) {
-                swapCard(boardButton);
-            } else if (wegeGameMaster.isLegalPlacement(nextCard, boardButton.row, boardButton.col)) {
-                placeCard(boardButton);
+            WegePlayer.PlayerMove currentPlayerMove = currentPlayer.playCard(nextCard, row, col);
+            if (currentPlayerMove == null) return;
+            switch (currentPlayerMove) {
+                case SWAP -> swapCard(boardButton);
+                case PLACE -> placeCard(boardButton);
             }
         });
         return boardButton;
@@ -98,7 +109,6 @@ public class WegeGame {
     private void setCardOnBoard(WegeBoardButton boardButton) {
         WegeCard nextCard = nextCardButton.getCard();
         boardButton.setCard(nextCard);
-        wegeGameMaster.placeCard(nextCard, boardButton.row, boardButton.col);
     }
 
 }
