@@ -6,6 +6,7 @@ import csds132.hw4.game.WegeDeck;
 import csds132.hw4.game.WegeGameSetting;
 import csds132.hw4.game.WegePlayer;
 import csds132.hw4.ui.pane.WegeBottomPane;
+import csds132.hw4.ui.pane.WegePlayingBoard;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.input.MouseEvent;
@@ -18,6 +19,9 @@ import java.util.LinkedList;
  * The view of a Wege game.
  */
 public class WegeGame extends VBox {
+
+    /* The top playing board of this box */
+    private WegePlayingBoard wegePlayingBoard;
 
     /** The bottom pane of this box */
     private WegeBottomPane bottomPane;
@@ -76,8 +80,7 @@ public class WegeGame extends VBox {
         ObservableList<Node> children = getChildren();
         children.add(playingBoard);
         children.add(bottomPane);
-        bottomPane.getPlayerTypeLabel().setValue(
-                wegePlayerMonitor.getQueuePlayer().getPlayerType().name());
+        bottomPane.displayPlayerType(wegePlayerMonitor.getQueuePlayer().getPlayerType());
     }
 
     /**
@@ -149,8 +152,7 @@ public class WegeGame extends VBox {
      */
     private void setCardOnBoard(WegeButton boardButton) {
         boardButton.setCard(getNextCardButton().getCard());
-        bottomPane.getPlayerTypeLabel().setValue(
-                wegePlayerMonitor.getQueuePlayer().getPlayerType().name());
+        bottomPane.displayPlayerType(wegePlayerMonitor.getQueuePlayer().getPlayerType());
     }
 
     /**

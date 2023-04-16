@@ -2,9 +2,6 @@ package csds132.hw4.ui.button;
 
 import csds132.hw4.game.WegeCard;
 import csds132.hw4.ui.WegeButton;
-import csds132.hw4.ui.label.WegeCardLabel;
-import csds132.hw4.ui.label.WegePlayerScoreLabel;
-import csds132.hw4.ui.label.WegePlayerTypeLabel;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -13,9 +10,7 @@ import javafx.scene.input.MouseEvent;
 
 public class WegeNextCardButton extends WegeButton {
 
-    /**
-     * Dynamic property which has the ability of listen to changes.
-     */
+    /* Dynamic property which has the ability of listen to changes. */
     ObjectProperty<WegeCard> cardProperty;
 
     /**
