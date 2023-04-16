@@ -113,7 +113,7 @@ public class Wege extends Application {
             int numberOfEachSpecialCard = arguments.get(2);
             wegeDeck = WegeDeck.createSpecialDeck(numberOfEachSpecialCard);
         } else {
-            wegeDeck = WegeDeck.createCustomDeck(rowsOfPlayingBoard, colsOfPlayingBoard);
+            wegeDeck = WegeDeck.createWegeDeck(rowsOfPlayingBoard, colsOfPlayingBoard);
         }
         wegeGameSetting = new WegeGameSetting(rowsOfPlayingBoard, colsOfPlayingBoard, wegeDeck);
         return wegeGameSetting;

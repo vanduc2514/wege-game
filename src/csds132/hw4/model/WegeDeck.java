@@ -1,6 +1,7 @@
 package csds132.hw4.model;
 
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.function.Supplier;
 
@@ -98,9 +99,69 @@ public class WegeDeck {
         return playingDeck;
     }
 
-    // TODO: implement
-    public static WegeDeck createCustomDeck(int rowsOfPlayingBoard, int colsOfPlayingBoard) {
-        return null;
+    /**
+     * Create a Wege deck base on the board dimension.
+     *
+     * @param rows the number of row for the playing board of the Wege Game
+     * @param cols the number of column for the playing board of the Wege Game
+     * @return a deck contains cards for the game Wege.
+     */
+    public static WegeDeck createWegeDeck(int rows, int cols) {
+        WegeDeck wegeDeck = createDefaultDeck();
+        // Only need significant
+        int difference = (rows * cols - 36) / 2;
+        // Both Land and Water cards need to be removed, hence the divide to 2.
+        final int numberOfCards = Math.abs(difference / 2);
+        if (difference < 0) {
+            // If significant smaller than the standard size.
+            removeWaterAndLandCardsFromDeck(wegeDeck, numberOfCards);
+        } else if (difference > 0) {
+            // If significant larger than the standard size.
+            addCardsToDeck(wegeDeck, numberOfCards);
+        }
+        wegeDeck.shuffle();
+        System.out.printf("Size of the board is %d x %d with %d cards%n",
+                rows, cols, wegeDeck.cards.size());
+        return wegeDeck;
+    }
+
+    /**
+     * Remove both Water and Land cards from the deck. If the deck has no cards left
+     * to be removed, stops removing.
+     *
+     * @param wegeDeck the Wege deck contains Land and Water cards.
+     * @param numberOfCards the number of each Land and Water cards.
+     */
+    private static void removeWaterAndLandCardsFromDeck(WegeDeck wegeDeck, int numberOfCards) {
+        int landCardsRemoved = 0;
+        int waterCardsRemoved = 0;
+        Iterator<WegeCard> deckIterator = wegeDeck.cards.iterator();
+        while (deckIterator.hasNext()) {
+            if (landCardsRemoved == numberOfCards
+                    && waterCardsRemoved == numberOfCards) {
+                break;
+            }
+            WegeCard cardInDeck = deckIterator.next();
+            if (cardInDeck.hasGnome()) {
+                if (cardInDeck.getCardType() == WegeCard.CardType.LAND) {
+                    landCardsRemoved++;
+                } else if (cardInDeck.getCardType() == WegeCard.CardType.WATER) {
+                    waterCardsRemoved++;
+                }
+                deckIterator.remove();
+            }
+        }
+    }
+
+    /**
+     * Add both Water and Land cards to the deck.
+     *
+     * @param wegeDeck a Wege deck.
+     * @param numberOfCards the number of each Land and Water cards.
+     */
+    private static void addCardsToDeck(WegeDeck wegeDeck, int numberOfCards) {
+        wegeDeck.addCardsToDeck(numberOfCards, cardSupplier(WegeCard.CardType.WATER, null));
+        wegeDeck.addCardsToDeck(numberOfCards, cardSupplier(WegeCard.CardType.LAND, null));
     }
 
     /**
