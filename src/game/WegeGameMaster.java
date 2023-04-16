@@ -1,7 +1,6 @@
 package game;
 
 import javafx.geometry.Pos;
-import javafx.util.Pair;
 
 import java.util.*;
 
@@ -18,7 +17,7 @@ public class WegeGameMaster {
      * The location (row, col) of Wege Cards on {@link #playingBoard}. This map is used
      * to find the location of a {@link WegeCard} without looping through the playing board.
      */
-    private final Map<WegeCard, Pair<Integer, Integer>> cardLocations;
+    private final Map<WegeCard, CardLocation> cardLocations;
 
     /**
      * Create a new master for the game Wege.
@@ -40,7 +39,7 @@ public class WegeGameMaster {
      */
     public void trackCard(WegeCard wegeCard, int row, int col) {
         playingBoard[row][col] = wegeCard;
-        Pair<Integer, Integer> location = new Pair<>(row, col);
+        CardLocation location = new CardLocation(row, col);
         cardLocations.put(wegeCard, location);
     }
 
@@ -135,10 +134,10 @@ public class WegeGameMaster {
      * @throws IllegalArgumentException if the wege card is not played on the board.
      */
     public List<WegeCard> findAdjacentCards(WegeCard wegeCard) {
-        Pair<Integer, Integer> currentCardLocation = cardLocations.get(wegeCard);
+        CardLocation currentCardLocation = cardLocations.get(wegeCard);
         if (currentCardLocation == null)
             throw new IllegalArgumentException("The given card is not played yet!");
-        return findAdjacentCards(currentCardLocation.getKey(), currentCardLocation.getValue());
+        return findAdjacentCards(currentCardLocation.row(), currentCardLocation.col());
     }
 
     /**
@@ -171,14 +170,14 @@ public class WegeGameMaster {
      *                                  or the card is not played on the board.
      */
     public List<WegeCard> findGnomeGroupMembers(WegeCard wegeCard) {
-        Pair<Integer, Integer> currentCardLocation = cardLocations.get(wegeCard);
+        CardLocation currentCardLocation = cardLocations.get(wegeCard);
         if (currentCardLocation == null) {
             throw new IllegalArgumentException("The given card is not played yet!");
         }
         if (!wegeCard.hasGnome()) {
             throw new IllegalArgumentException("The given card does not have a Gnome!");
         }
-        return findGnomeGroupMembers(currentCardLocation.getKey(), currentCardLocation.getValue());
+        return findGnomeGroupMembers(currentCardLocation.row(), currentCardLocation.col());
     }
 
     /**
@@ -297,5 +296,13 @@ public class WegeGameMaster {
             return null;
         }
     }
+
+    /**
+     * Record class to represent location of a card in the playing board (row, col).
+     *
+     * @param row the row of this location
+     * @param col the column of this location
+     */
+    private record CardLocation(int row, int col) {}
 
 }
