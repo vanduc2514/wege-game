@@ -1,5 +1,7 @@
 package csds132.hw4.model;
 
+import java.util.regex.Pattern;
+
 /**
  * A record hold settings for a Wege Game
  *
@@ -8,6 +10,9 @@ package csds132.hw4.model;
  * @param deck the deck contains wege cards for this game.
  */
 public record WegeGameSetting(int rows, int cols, WegeDeck deck) {
+
+    // Only accept maximum two-digit positive number start from 1
+    public static final Pattern VALID_POSITIVE_INTEGER_REGEX = Pattern.compile("^[1-9]$");
 
     /**
      * Create a game with a 6 x 6 board and a default deck.
