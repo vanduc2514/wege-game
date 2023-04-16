@@ -109,7 +109,7 @@ public class WegeDeck {
     public static WegeDeck createWegeDeck(int rows, int cols) {
         WegeDeck wegeDeck = createDefaultDeck();
         // Only need significant
-        int difference = (rows * cols - 36) / 2;
+        int difference = rows * cols - 36;
         // Both Land and Water cards need to be removed, hence the divide to 2.
         final int numberOfCards = Math.abs(difference / 2);
         if (difference < 0) {
