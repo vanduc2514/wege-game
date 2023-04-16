@@ -1,5 +1,5 @@
 import csds132.hw4.game.WegeGameSetting;
-import csds132.hw4.ui.WegeGame;
+import csds132.hw4.ui.pane.WegeGameBox;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -42,7 +42,7 @@ public class Wege extends Application {
         WegeGameSetting wegeGameSetting = retrieveSettingFromCLI();
         System.out.printf("Start the game with %d x %d playing board and %d cards%n",
                 wegeGameSetting.rows(), wegeGameSetting.cols(), wegeGameSetting.deck().size());
-        Scene scene = new Scene(new WegeGame(wegeGameSetting));
+        Scene scene = new Scene(new WegeGameBox(wegeGameSetting));
         primaryStage.setScene(scene);
         primaryStage.show();
     }

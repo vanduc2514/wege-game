@@ -1,7 +1,6 @@
 package csds132.hw4.ui.button;
 
 import csds132.hw4.game.WegeCard;
-import csds132.hw4.ui.WegeButton;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
