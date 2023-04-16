@@ -37,7 +37,7 @@ public class WegeGameMaster {
      * @param row      the row of this card on the playing board.
      * @param col      the column of this card on the playing board.
      */
-    public void trackCard(WegeCard wegeCard, int row, int col) {
+    public void trackPlayedCard(WegeCard wegeCard, int row, int col) {
         playingBoard[row][col] = wegeCard;
         CardLocation location = new CardLocation(row, col);
         cardLocations.put(wegeCard, location);

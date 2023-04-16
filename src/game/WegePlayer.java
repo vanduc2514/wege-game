@@ -71,13 +71,14 @@ public class WegePlayer {
                 // can swap with the card on the board ?
                 && wegeGameMaster.isLegalSwap(row, col)) {
             playerMove = PlayerMove.SWAP;
-            // ask the game master if this player
-            // can place the card on the board ?
-        } else if (wegeGameMaster.isLegalPlacement(nextCard, row, col)) {
+        } else if (
+                // ask the game master if this player
+                // can place the card on the board ?
+                wegeGameMaster.isLegalPlacement(nextCard, row, col)) {
             playerMove = PlayerMove.PLACE;
         }
         if (playerMove != null) {
-            wegeGameMaster.trackCard(nextCard, row, col);
+            wegeGameMaster.trackPlayedCard(nextCard, row, col);
             cardPlayed.add(nextCard);
             return playerMove;
         } else {
