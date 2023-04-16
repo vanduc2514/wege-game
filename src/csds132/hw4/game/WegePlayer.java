@@ -21,10 +21,11 @@ public class WegePlayer {
     /* The type of this player. */
     private final PlayerType playerType;
 
-    /**
-     * The list of cards played so far.
-     */
+    /* The list of cards played so far. */
     private final Deque<WegeCard> cardPlayed;
+
+    /* The current score of this player */
+    private int score;
 
     /**
      * This constructor is hidden to make sure a player must
@@ -46,15 +47,22 @@ public class WegePlayer {
     }
 
     /**
+     * The current score of this player.
+     */
+    public int getScore() {
+        return this.score;
+    }
+
+    /**
      * Decide the next move and keep track all the cards played so far.
      *
      * @param nextCard the card that this player receive from the deck.
      * @param row the row on the playing board to place the next card.
      * @param col the col on the playing board to place the next card.
      * @return {@link PlayerMove} after a decision is made. or return null
-     * if this player move is illegal.
+     * @throws IllegalMoveException if this player move is illegal.
      */
-    public PlayerMove playCard(WegeCard nextCard, int row, int col) {
+    public PlayerMove playCard(WegeCard nextCard, int row, int col) throws IllegalMoveException {
         PlayerMove playerMove = null;
         if (cardPlayed.isEmpty()) {
             playerMove = PlayerMove.PLACE;
@@ -68,6 +76,7 @@ public class WegePlayer {
         } else if (wegeGameMaster.isLegalPlacement(nextCard, row, col)) {
             playerMove = PlayerMove.PLACE;
         }
+        if (playerMove == null) throw new IllegalMoveException("Player made an illegal move");
         wegeGameMaster.trackCard(nextCard, row, col);
         cardPlayed.add(nextCard);
         return playerMove;

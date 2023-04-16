@@ -5,6 +5,7 @@ import csds132.hw4.game.WegeCard;
 import csds132.hw4.game.WegeDeck;
 import csds132.hw4.game.WegeGameSetting;
 import csds132.hw4.game.WegePlayer;
+import csds132.hw4.game.IllegalMoveException;
 import csds132.hw4.ui.button.WegeBoardButton;
 import csds132.hw4.ui.button.WegeButton;
 import javafx.collections.ObservableList;
@@ -97,12 +98,15 @@ public class WegeGameBox extends VBox {
             WegeBoardButton boardButton = (WegeBoardButton) mouseClickedEvent.getSource();
             WegePlayer currentPlayer = wegePlayerMonitor.getCurrentPlayer();
             WegeCard nextCard = bottomPane.getNextCard();
-            WegePlayer.PlayerMove currentPlayerMove = currentPlayer.playCard
-                    (nextCard, boardButton.getRow(), boardButton.getCol());
-            if (currentPlayerMove == null) return;
-            switch (currentPlayerMove) {
-                case PLACE -> placeCard(boardButton, bottomPane);
-                case SWAP -> swapCard(boardButton, bottomPane);
+            try {
+                WegePlayer.PlayerMove currentPlayerMove = currentPlayer.playCard(
+                        nextCard, boardButton.getRow(), boardButton.getCol());
+                switch (currentPlayerMove) {
+                    case PLACE -> placeCard(boardButton, bottomPane);
+                    case SWAP -> swapCard(boardButton, bottomPane);
+                }
+            } catch (IllegalMoveException ignored) {
+                // TODO: Should display explanation why this player made the wrong move ?
             }
         };
     }
