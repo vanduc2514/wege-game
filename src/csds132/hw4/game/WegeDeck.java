@@ -10,6 +10,8 @@ import java.util.function.Supplier;
  */
 public class WegeDeck {
 
+    public static final int STANDARD_BOARD_TILES = 36;
+
     /* The position of Gnome in a card. */
     private enum GnomePos {PATH, CORNER}
 
@@ -52,6 +54,13 @@ public class WegeDeck {
     }
 
     /**
+     * Get the size of the deck.
+     */
+    public int size() {
+        return cards.size();
+    }
+
+    /**
      * Create a deck contains 40 cards of the following types.
      *
      * <ul><li>12 land cards without gnomes</li>
@@ -66,7 +75,7 @@ public class WegeDeck {
      *
      * @return a {@link WegeDeck} for the playing board.
      */
-    public static WegeDeck createDefaultDeck() {
+    public static WegeDeck createStandardDeck() {
         WegeDeck playingDeck = new WegeDeck();
         playingDeck.addCardsToDeck(12, cardSupplier(WegeCard.CardType.LAND, null));
         playingDeck.addCardsToDeck(12, cardSupplier(WegeCard.CardType.WATER, null));
@@ -100,16 +109,17 @@ public class WegeDeck {
     }
 
     /**
-     * Create a Wege deck base on the board dimension.
+     * Create a Wege deck base on the board dimension. Only significant different
+     * of tiles to the standard tiles {@link #STANDARD_BOARD_TILES} are taken
+     * into consideration.
      *
      * @param rows the number of row for the playing board of the Wege Game
      * @param cols the number of column for the playing board of the Wege Game
      * @return a deck contains cards for the game Wege.
      */
     public static WegeDeck createWegeDeck(int rows, int cols) {
-        WegeDeck wegeDeck = createDefaultDeck();
-        // Only need significant
-        int difference = rows * cols - 36;
+        WegeDeck wegeDeck = createStandardDeck();
+        int difference = rows * cols - STANDARD_BOARD_TILES;
         // Both Land and Water cards need to be removed, hence the divide to 2.
         final int numberOfCards = Math.abs(difference / 2);
         if (difference < 0) {
@@ -120,8 +130,6 @@ public class WegeDeck {
             addCardsToDeck(wegeDeck, numberOfCards);
         }
         wegeDeck.shuffle();
-        System.out.printf("Size of the board is %d x %d with %d cards%n",
-                rows, cols, wegeDeck.cards.size());
         return wegeDeck;
     }
 

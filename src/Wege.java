@@ -1,4 +1,3 @@
-import csds132.hw4.game.WegeDeck;
 import csds132.hw4.game.WegeGameSetting;
 import csds132.hw4.ui.WegeGame;
 import javafx.application.Application;
@@ -10,8 +9,30 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
+/**
+ * Wege game application
+ */
 public class Wege extends Application {
 
+    /**
+     * Start the game with the given arguments
+     *
+     * @param args the argument of the game Wege.
+     *             <ul>
+     *                  <li>
+     *                      If no arguments is provided, start the game with
+     *                      {@link WegeGameSetting#createStandardGame()}
+     *                  </li>
+     *                  <li>
+     *                      If one argument is provided, start the game with
+     *                      {@link WegeGameSetting#createSpecialGame(int)}
+     *                  </li>
+     *                  <li>
+     *                      If two or more arguments is provided, start the game with
+     *                      {@link WegeGameSetting#createGame(List)}
+     *                  </li>
+     *             </ul>
+     */
     public static void main(String[] args) {
         launch(args);
     }
@@ -19,6 +40,8 @@ public class Wege extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         WegeGameSetting wegeGameSetting = retrieveSettingFromCLI();
+        System.out.printf("Start the game with %d x %d playing board and %d cards%n",
+                wegeGameSetting.rows(), wegeGameSetting.cols(), wegeGameSetting.deck().size());
         Scene scene = new Scene(new WegeGame(wegeGameSetting));
         primaryStage.setScene(scene);
         primaryStage.show();
@@ -85,38 +108,12 @@ public class Wege extends Application {
      * @return a Wege game setting.
      */
     private static WegeGameSetting parseGameArguments(List<Integer> gameArguments) {
-        WegeGameSetting wegeGameSetting;
         switch (gameArguments.size()) {
-            case 0 -> wegeGameSetting = WegeGameSetting.createDefaultGame();
-            case 1 -> {
-                int numberOfEachSpecialCard = gameArguments.get(0);
-                WegeDeck specialDeck = WegeDeck.createSpecialDeck(numberOfEachSpecialCard);
-                wegeGameSetting = WegeGameSetting.createDefaultBoardWithDeck(specialDeck);
-            }
-            default -> wegeGameSetting = createCustomSetting(gameArguments);
+            case 0 -> WegeGameSetting.createStandardGame();
+            case 1 -> WegeGameSetting.createSpecialGame(gameArguments.get(0));
+            default -> WegeGameSetting.createGame(gameArguments);
         }
-        return wegeGameSetting;
-    }
-
-    /**
-     * Create a custom setting for the Wege game.
-     *
-     * @param arguments the arguments given to this application.
-     * @return a Wege game setting.
-     */
-    private static WegeGameSetting createCustomSetting(List<Integer> arguments) {
-        WegeGameSetting wegeGameSetting;
-        int rowsOfPlayingBoard = arguments.get(0);
-        int colsOfPlayingBoard = arguments.get(1);
-        WegeDeck wegeDeck;
-        if (arguments.size() == 3) {
-            int numberOfEachSpecialCard = arguments.get(2);
-            wegeDeck = WegeDeck.createSpecialDeck(numberOfEachSpecialCard);
-        } else {
-            wegeDeck = WegeDeck.createWegeDeck(rowsOfPlayingBoard, colsOfPlayingBoard);
-        }
-        wegeGameSetting = new WegeGameSetting(rowsOfPlayingBoard, colsOfPlayingBoard, wegeDeck);
-        return wegeGameSetting;
+        throw new IllegalArgumentException("Wege game cannot be created with the given arguments!");
     }
 
 }
