@@ -5,15 +5,10 @@ import csds132.hw4.game.WegeCard;
 import csds132.hw4.game.WegeDeck;
 import csds132.hw4.game.WegeGameSetting;
 import csds132.hw4.game.WegePlayer;
-import csds132.hw4.ui.button.WegeNextCardButton;
-import csds132.hw4.ui.label.WegeCardLabel;
-import csds132.hw4.ui.label.WegePlayerScoreLabel;
-import csds132.hw4.ui.label.WegePlayerTypeLabel;
+import csds132.hw4.ui.pane.WegeBottomPane;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
-import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 
@@ -24,17 +19,11 @@ import java.util.LinkedList;
  */
 public class WegeGame extends VBox {
 
-    /* The next card button in this view. */
-    private WegeButton nextCardButton;
-
-    // TODO: bind label with Next Card Button to automatically update when a new card is set.
-    private final Label label = new Label();
+    /** The bottom pane of this box */
+    private WegeBottomPane bottomPane;
 
     /* Track players of a Wege Game. */
     private final WegePlayerMonitor wegePlayerMonitor;
-
-    /* The Deck contains wege cards for this game. */
-    private final WegeDeck wegeDeck;
 
     /**
      * Create a new Wege Game.
@@ -44,9 +33,8 @@ public class WegeGame extends VBox {
      * @param wegeDeck the dek contains wege cards for this game.
      */
     public WegeGame(int rows, int cols, WegeDeck wegeDeck) {
-        this.wegeDeck = wegeDeck;
         wegePlayerMonitor = createPlayerMonitor(rows, cols);
-        createBoxView(rows, cols);
+        createView(rows, cols, wegeDeck);
     }
 
     /**
@@ -82,12 +70,14 @@ public class WegeGame extends VBox {
      * @param rows the number of row for the playing board of the Wege Game
      * @param cols the number of column for the playing board of the Wege Game
      */
-    private void createBoxView(int rows, int cols) {
+    private void createView(int rows, int cols, WegeDeck wegeDeck) {
         GridPane playingBoard = createPlayingBoard(rows, cols);
-        FlowPane flowPane = createBottomPane();
+        bottomPane = new WegeBottomPane(wegeDeck);
         ObservableList<Node> children = getChildren();
         children.add(playingBoard);
-        children.add(flowPane);
+        children.add(bottomPane);
+        bottomPane.getPlayerTypeLabel().setValue(
+                wegePlayerMonitor.getQueuePlayer().getPlayerType().name());
     }
 
     /**
@@ -110,60 +100,6 @@ public class WegeGame extends VBox {
     }
 
     /**
-     * Create the bottom pane for this view.
-     *
-     * @return a {@link FlowPane} contains a {@link WegeButton} to let a player
-     * choose a card to play on the playing board.
-     */
-    private FlowPane createBottomPane() {
-        FlowPane flowPane = new FlowPane();
-        VBox gameInfoBox = new VBox();
-        WegeCardLabel cardLabel = new WegeCardLabel();
-        WegePlayerTypeLabel playerTypeLabel = new WegePlayerTypeLabel();
-        WegePlayerScoreLabel playerScoreLabel = new WegePlayerScoreLabel();
-        gameInfoBox.getChildren().addAll(cardLabel, playerTypeLabel, playerScoreLabel);
-        nextCardButton = createNextCardButton(cardLabel, playerTypeLabel, playerScoreLabel);
-        flowPane.getChildren().addAll(nextCardButton, gameInfoBox);
-        return flowPane;
-    }
-
-    /**
-     * Create the next card button. This button can display the next card
-     * to be played and can rotate that card.
-     *
-     * @return a {@link WegeButton} initially display the first card from the deck.
-     */
-    private WegeButton createNextCardButton(
-            WegeCardLabel cardLabel,
-            WegePlayerTypeLabel playerTypeLabel,
-            WegePlayerScoreLabel playerScoreLabel) {
-        WegeNextCardButton nextCardButton = new WegeNextCardButton(100, 100);
-        nextCardButton.addCardChangedListener((observable, oldCard, newCard) -> {
-            if (newCard != null) {
-                cardLabel.setText(newCard.getCardType().name());
-                String queuePlayerType = wegePlayerMonitor.getQueuePlayer().getPlayerType().name();
-                playerTypeLabel.setValue(queuePlayerType);
-                playerScoreLabel.setValue("0");
-            } else {
-                cardLabel.clearText();
-                playerTypeLabel.clearText();
-                playerScoreLabel.clearText();
-            }
-        });
-        nextCardButton.addMouseClickedListener(mouseClickedEvent -> {
-            if (nextCardButton.getCard() == null) {
-                WegeCard nextCard = wegeDeck.drawFromFront();
-                nextCardButton.setCard(nextCard);
-            } else {
-                nextCardButton.rotate();
-            }
-        });
-        WegeCard initialCard = wegeDeck.drawFromFront();
-        nextCardButton.setCard(initialCard);
-        return nextCardButton;
-    }
-
-    /**
      * Create the button on the playing board. This button display the card
      * that a player play.
      *
@@ -174,9 +110,9 @@ public class WegeGame extends VBox {
     private WegeButton createBoardButton(int rows, int cols) {
         WegeButton boardButton = new WegeButton(100, 100);
         boardButton.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
-            if (nextCardButton.getCard() == null) return;
+            if (getNextCardButton().getCard() == null) return;
             WegePlayer currentPlayer = wegePlayerMonitor.getCurrentPlayer();
-            WegeCard nextCard = nextCardButton.getCard();
+            WegeCard nextCard = getNextCardButton().getCard();
             WegePlayer.PlayerMove currentPlayerMove = currentPlayer.playCard(nextCard, rows, cols);
             if (currentPlayerMove == null) return;
             switch (currentPlayerMove) {
@@ -193,8 +129,8 @@ public class WegeGame extends VBox {
      * @param boardButton the button on the playing board to place a card.
      */
     private void placeCard(WegeButton boardButton) {
-        boardButton.setCard(nextCardButton.getCard());
-        nextCardButton.setCard(null);
+        setCardOnBoard(boardButton);
+        getNextCardButton().setCard(null);
     }
 
     /**
@@ -204,8 +140,24 @@ public class WegeGame extends VBox {
      */
     private void swapCard(WegeButton boardButton) {
         WegeCard currentCardOnBoard = boardButton.getCard();
-        boardButton.setCard(nextCardButton.getCard());
-        nextCardButton.setCard(currentCardOnBoard);
+        setCardOnBoard(boardButton);
+        getNextCardButton().setCard(currentCardOnBoard);
+    }
+
+    /**
+     * Set new card to the board.
+     */
+    private void setCardOnBoard(WegeButton boardButton) {
+        boardButton.setCard(getNextCardButton().getCard());
+        bottomPane.getPlayerTypeLabel().setValue(
+                wegePlayerMonitor.getQueuePlayer().getPlayerType().name());
+    }
+
+    /**
+     * Return the next card button from the bottom pane.
+     */
+    private WegeButton getNextCardButton() {
+        return bottomPane.getNextCardButton();
     }
 
 }
