@@ -1,5 +1,5 @@
-import csds132.hw4.model.WegeDeck;
-import csds132.hw4.model.WegeGameSetting;
+import csds132.hw4.game.WegeDeck;
+import csds132.hw4.game.WegeGameSetting;
 import csds132.hw4.ui.WegeGame;
 import javafx.application.Application;
 import javafx.scene.Scene;

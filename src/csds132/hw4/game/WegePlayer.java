@@ -1,6 +1,4 @@
-package csds132.hw4.model;
-
-import csds132.hw4.game.WegeGameMaster;
+package csds132.hw4.game;
 
 import java.util.Deque;
 import java.util.LinkedList;

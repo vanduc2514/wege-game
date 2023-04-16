@@ -1,6 +1,5 @@
 package csds132.hw4.game;
 
-import csds132.hw4.model.WegeCard;
 import javafx.geometry.Pos;
 import javafx.util.Pair;
 

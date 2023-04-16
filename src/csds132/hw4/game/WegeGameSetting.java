@@ -1,4 +1,4 @@
-package csds132.hw4.model;
+package csds132.hw4.game;
 
 import java.util.regex.Pattern;
 

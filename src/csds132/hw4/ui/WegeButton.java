@@ -1,6 +1,6 @@
 package csds132.hw4.ui;
 
-import csds132.hw4.model.WegeCard;
+import csds132.hw4.game.WegeCard;
 import javafx.scene.control.Button;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
