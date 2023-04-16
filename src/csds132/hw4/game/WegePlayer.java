@@ -37,30 +37,12 @@ public class WegePlayer {
     }
 
     /**
-     * The builder that build a {@link WegePlayer}.
+     * Get the type of this player.
+     *
+     * @return the type of this player.
      */
-    public static class WegePlayerBuilder {
-
-        /**
-         * Build a player from a type.
-         *
-         * @param playerType the type of the player.
-         * @return a new instance of {@link WegePlayer}.
-         */
-        public WegePlayer buildPlayer(PlayerType playerType) {
-            return new WegePlayer(playerType);
-        }
-
-        /**
-         * Create a Builder from a {@link WegeGameMaster}. This builder make
-         * sure to share the game master to all of the {@link WegePlayer} that it builds.
-         *
-         * @param wegeGameMaster the {@link WegeGameMaster} which helps track the game rules.
-         */
-        public WegePlayerBuilder(WegeGameMaster wegeGameMaster) {
-            WegePlayer.wegeGameMaster = wegeGameMaster;
-        }
-
+    public PlayerType getPlayerType() {
+        return playerType;
     }
 
     /**
@@ -89,6 +71,33 @@ public class WegePlayer {
         wegeGameMaster.trackCard(nextCard, row, col);
         cardPlayed.add(nextCard);
         return playerMove;
+    }
+
+    /**
+     * The builder that build a {@link WegePlayer}.
+     */
+    public static class WegePlayerBuilder {
+
+        /**
+         * Build a player from a type.
+         *
+         * @param playerType the type of the player.
+         * @return a new instance of {@link WegePlayer}.
+         */
+        public WegePlayer buildPlayer(PlayerType playerType) {
+            return new WegePlayer(playerType);
+        }
+
+        /**
+         * Create a Builder from a {@link WegeGameMaster}. This builder make
+         * sure to share the game master to all of the {@link WegePlayer} that it builds.
+         *
+         * @param wegeGameMaster the {@link WegeGameMaster} which helps track the game rules.
+         */
+        public WegePlayerBuilder(WegeGameMaster wegeGameMaster) {
+            WegePlayer.wegeGameMaster = wegeGameMaster;
+        }
+
     }
 
 }

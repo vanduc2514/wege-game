@@ -20,9 +20,20 @@ public class WegePlayerMonitor {
     }
 
     /**
-     * Get the current player to take this turn.
+     * Get the player queue for the next turn. This player
+     * is not removed from the queue.
      *
-     * @return the current player.
+     * @return the player queue for the next turn.
+     */
+    public WegePlayer getQueuePlayer() {
+        return playersQueue.peek();
+    }
+
+    /**
+     * Get the player to take this turn. The player is then removed
+     * from the top of the queue, and is queued for the next turn.
+     *
+     * @return the current player for this turn.
      */
     public WegePlayer getCurrentPlayer() {
         WegePlayer currentPlayer = playersQueue.pop();

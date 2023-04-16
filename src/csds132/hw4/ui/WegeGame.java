@@ -5,6 +5,10 @@ import csds132.hw4.game.WegeCard;
 import csds132.hw4.game.WegeDeck;
 import csds132.hw4.game.WegeGameSetting;
 import csds132.hw4.game.WegePlayer;
+import csds132.hw4.ui.button.WegeNextCardButton;
+import csds132.hw4.ui.label.WegeCardLabel;
+import csds132.hw4.ui.label.WegePlayerScoreLabel;
+import csds132.hw4.ui.label.WegePlayerTypeLabel;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -113,8 +117,13 @@ public class WegeGame extends VBox {
      */
     private FlowPane createBottomPane() {
         FlowPane flowPane = new FlowPane();
-        nextCardButton = createNextCardButton();
-        flowPane.getChildren().add(nextCardButton);
+        VBox gameInfoBox = new VBox();
+        WegeCardLabel cardLabel = new WegeCardLabel();
+        WegePlayerTypeLabel playerTypeLabel = new WegePlayerTypeLabel();
+        WegePlayerScoreLabel playerScoreLabel = new WegePlayerScoreLabel();
+        gameInfoBox.getChildren().addAll(cardLabel, playerTypeLabel, playerScoreLabel);
+        nextCardButton = createNextCardButton(cardLabel, playerTypeLabel, playerScoreLabel);
+        flowPane.getChildren().addAll(nextCardButton, gameInfoBox);
         return flowPane;
     }
 
@@ -124,19 +133,33 @@ public class WegeGame extends VBox {
      *
      * @return a {@link WegeButton} initially display the first card from the deck.
      */
-    private WegeButton createNextCardButton() {
-        WegeButton nextCardButton = new WegeButton(100, 100);
-        WegeCard firstCard = wegeDeck.drawFromFront();
-        nextCardButton.setCard(firstCard);
-        nextCardButton.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
+    private WegeButton createNextCardButton(
+            WegeCardLabel cardLabel,
+            WegePlayerTypeLabel playerTypeLabel,
+            WegePlayerScoreLabel playerScoreLabel) {
+        WegeNextCardButton nextCardButton = new WegeNextCardButton(100, 100);
+        nextCardButton.addCardChangedListener((observable, oldCard, newCard) -> {
+            if (newCard != null) {
+                cardLabel.setText(newCard.getCardType().name());
+                String queuePlayerType = wegePlayerMonitor.getQueuePlayer().getPlayerType().name();
+                playerTypeLabel.setValue(queuePlayerType);
+                playerScoreLabel.setValue("0");
+            } else {
+                cardLabel.clearText();
+                playerTypeLabel.clearText();
+                playerScoreLabel.clearText();
+            }
+        });
+        nextCardButton.addMouseClickedListener(mouseClickedEvent -> {
             if (nextCardButton.getCard() == null) {
                 WegeCard nextCard = wegeDeck.drawFromFront();
                 nextCardButton.setCard(nextCard);
-                label.setText(nextCard.getCardType().name());
             } else {
                 nextCardButton.rotate();
             }
         });
+        WegeCard initialCard = wegeDeck.drawFromFront();
+        nextCardButton.setCard(initialCard);
         return nextCardButton;
     }
 

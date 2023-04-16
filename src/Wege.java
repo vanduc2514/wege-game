@@ -108,12 +108,11 @@ public class Wege extends Application {
      * @return a Wege game setting.
      */
     private static WegeGameSetting parseGameArguments(List<Integer> gameArguments) {
-        switch (gameArguments.size()) {
+        return switch (gameArguments.size()) {
             case 0 -> WegeGameSetting.createStandardGame();
             case 1 -> WegeGameSetting.createSpecialGame(gameArguments.get(0));
             default -> WegeGameSetting.createGame(gameArguments);
-        }
-        throw new IllegalArgumentException("Wege game cannot be created with the given arguments!");
+        };
     }
 
 }
