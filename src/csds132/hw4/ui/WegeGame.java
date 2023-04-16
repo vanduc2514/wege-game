@@ -152,7 +152,7 @@ public class WegeGame extends VBox {
         WegeButton boardButton = new WegeButton(100, 100);
         boardButton.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
             if (nextCardButton.getCard() == null) return;
-            WegePlayer currentPlayer = wegePlayerMonitor.getNextPlayer();
+            WegePlayer currentPlayer = wegePlayerMonitor.getCurrentPlayer();
             WegeCard nextCard = nextCardButton.getCard();
             WegePlayer.PlayerMove currentPlayerMove = currentPlayer.playCard(nextCard, rows, cols);
             if (currentPlayerMove == null) return;
