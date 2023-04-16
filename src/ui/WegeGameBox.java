@@ -6,10 +6,9 @@ import game.WegeDeck;
 import game.WegeGameSetting;
 import game.WegePlayer;
 import game.IllegalMoveException;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.ObservableList;
-import javafx.event.EventHandler;
 import javafx.scene.Node;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 
 import java.util.LinkedList;
@@ -38,6 +37,8 @@ public class WegeGameBox extends VBox {
     public WegeGameBox(int rows, int cols, WegeDeck wegeDeck) {
         wegePlayerMonitor = createPlayerMonitor(rows, cols);
         createView(rows, cols, wegeDeck);
+        // UI Interactions when a player click a button on the playing board.
+        playingBoard.addButtonClickedChangedListener(getBoardButtonClickedListener(bottomPane));
     }
 
     /**
@@ -76,8 +77,7 @@ public class WegeGameBox extends VBox {
      */
     private void createView(int rows, int cols, WegeDeck startingDeck) {
         bottomPane = new WegeBottomPane(startingDeck);
-        EventHandler<MouseEvent> clickToBoardHandler = getClickToBoardHandler(bottomPane);
-        playingBoard = new WegePlayingBoardPane(rows, cols, clickToBoardHandler);
+        playingBoard = new WegePlayingBoardPane(rows, cols);
         ObservableList<Node> children = getChildren();
         children.add(playingBoard);
         children.add(bottomPane);
@@ -86,22 +86,23 @@ public class WegeGameBox extends VBox {
     }
 
     /**
-     * Get the handler when mouse click to the button on the playing board
+     * Get the listener when mouse click to the button on the playing board.
      *
      * @param bottomPane the bottom pane to set the place or swap cards.
+     * @return a listener which knows the button being clicked on the playing board
+     * and handle that event.
      */
-    private EventHandler<MouseEvent> getClickToBoardHandler(WegeBottomPane bottomPane) {
-        return mouseClickedEvent -> {
+    private ChangeListener<WegeBoardButton> getBoardButtonClickedListener(WegeBottomPane bottomPane) {
+        return (observable, previousButtonClicked, nextButtonClicked) -> {
             if (bottomPane.getNextCard() == null) return;
-            WegeBoardButton boardButton = (WegeBoardButton) mouseClickedEvent.getSource();
             WegePlayer currentPlayer = wegePlayerMonitor.getCurrentPlayer();
             WegeCard nextCard = bottomPane.getNextCard();
             try {
                 WegePlayer.PlayerMove currentPlayerMove = currentPlayer.playCard(
-                        nextCard, boardButton.getRow(), boardButton.getCol());
+                        nextCard, nextButtonClicked.getRow(), nextButtonClicked.getCol());
                 switch (currentPlayerMove) {
-                    case PLACE -> placeCard(boardButton, bottomPane);
-                    case SWAP -> swapCard(boardButton, bottomPane);
+                    case PLACE -> placeCard(nextButtonClicked, bottomPane);
+                    case SWAP -> swapCard(nextButtonClicked, bottomPane);
                 }
             } catch (IllegalMoveException ignored) {
                 // TODO: Should display explanation why this player made the wrong move ?
