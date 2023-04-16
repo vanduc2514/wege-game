@@ -1,9 +1,9 @@
-package csds132.hw4.ui.pane;
+package ui;
 
-import csds132.hw4.game.WegeCard;
-import csds132.hw4.game.WegeDeck;
-import csds132.hw4.game.WegePlayer;
-import csds132.hw4.ui.button.WegeNextCardButton;
+import game.WegeCard;
+import game.WegeDeck;
+import game.WegePlayer;
+import ui.WegeNextCardButton;
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;
 import javafx.scene.layout.FlowPane;

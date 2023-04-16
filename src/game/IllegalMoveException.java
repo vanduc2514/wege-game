@@ -1,4 +1,4 @@
-package csds132.hw4.game;
+package game;
 
 /* Exception for the move is not illegal */
 public class IllegalMoveException extends Exception {

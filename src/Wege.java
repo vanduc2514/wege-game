@@ -1,5 +1,5 @@
-import csds132.hw4.game.WegeGameSetting;
-import csds132.hw4.ui.pane.WegeGameBox;
+import game.WegeGameSetting;
+import ui.WegeGameBox;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;

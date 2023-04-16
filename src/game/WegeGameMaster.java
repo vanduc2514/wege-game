@@ -1,4 +1,4 @@
-package csds132.hw4.game;
+package game;
 
 import javafx.geometry.Pos;
 import javafx.util.Pair;

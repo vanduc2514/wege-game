@@ -1,4 +1,4 @@
-package csds132.hw4.ui.button;
+package ui;
 
 public class WegeBoardButton extends WegeButton {
 

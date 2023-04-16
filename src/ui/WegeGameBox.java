@@ -1,13 +1,11 @@
-package csds132.hw4.ui.pane;
+package ui;
 
-import csds132.hw4.game.*;
-import csds132.hw4.game.WegeCard;
-import csds132.hw4.game.WegeDeck;
-import csds132.hw4.game.WegeGameSetting;
-import csds132.hw4.game.WegePlayer;
-import csds132.hw4.game.IllegalMoveException;
-import csds132.hw4.ui.button.WegeBoardButton;
-import csds132.hw4.ui.button.WegeButton;
+import game.*;
+import game.WegeCard;
+import game.WegeDeck;
+import game.WegeGameSetting;
+import game.WegePlayer;
+import game.IllegalMoveException;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
