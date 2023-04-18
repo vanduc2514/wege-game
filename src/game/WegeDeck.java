@@ -26,27 +26,6 @@ public class WegeDeck {
     }
 
     /**
-     * Add multiple cards with the same type to the deck.
-     *
-     * @param cards the amount of cards adds to the deck.
-     * @param cardSupplier a {@link Supplier} to supply a type of wege card.
-     */
-    public void addCardsToDeck(
-            int cards,
-            Supplier<WegeCard> cardSupplier) {
-        for (int i = 0; i < cards; i++) {
-            this.cards.add(cardSupplier.get());
-        }
-    }
-
-    /**
-     * Shuffle the deck.
-     */
-    public void shuffle() {
-        Collections.shuffle(cards);
-    }
-
-    /**
      * Draw the first card from the deck.
      */
     public WegeCard drawFromFront() {
@@ -61,9 +40,31 @@ public class WegeDeck {
     }
 
     /**
+     * Add multiple cards with the same type to the deck.
+     *
+     * @param cards the amount of cards adds to the deck.
+     * @param cardSupplier a {@link Supplier} to supply a type of wege card.
+     */
+    private void addCardsToDeck(
+            int cards,
+            Supplier<WegeCard> cardSupplier) {
+        for (int i = 0; i < cards; i++) {
+            this.cards.add(cardSupplier.get());
+        }
+    }
+
+    /**
+     * Shuffle the deck.
+     */
+    private void shuffle() {
+        Collections.shuffle(cards);
+    }
+
+    /**
      * Create a deck contains 40 cards of the following types.
      *
-     * <ul><li>12 land cards without gnomes</li>
+     * <ul>
+     *     <li>12 land cards without gnomes</li>
      *     <li>12 water cards without gnomes</li>
      *     <li>3 land cards with a land gnome on the path</li>
      *     <li>2 land cards with a water gnome on one of the water corners</li>
@@ -77,21 +78,14 @@ public class WegeDeck {
      */
     public static WegeDeck createStandardDeck() {
         WegeDeck playingDeck = new WegeDeck();
-        playingDeck.addCardsToDeck(12, cardSupplier(WegeCard.CardType.LAND, null));
-        playingDeck.addCardsToDeck(12, cardSupplier(WegeCard.CardType.WATER, null));
-        playingDeck.addCardsToDeck(3, cardSupplier(WegeCard.CardType.LAND, GnomePos.PATH));
-        playingDeck.addCardsToDeck(2, cardSupplier(WegeCard.CardType.LAND, GnomePos.CORNER));
-        playingDeck.addCardsToDeck(3, cardSupplier(WegeCard.CardType.WATER, GnomePos.PATH));
-        playingDeck.addCardsToDeck(2, cardSupplier(WegeCard.CardType.LAND, GnomePos.CORNER));
-        playingDeck.addCardsToDeck(3, cardSupplier(WegeCard.CardType.COSSACK, null));
-        playingDeck.addCardsToDeck(3, cardSupplier(WegeCard.CardType.BRIDGE, null));
+        insertStandardCards(playingDeck);
         playingDeck.shuffle();
         return playingDeck;
     }
 
     /**
      * Create a special deck contains only cossack cards, bridge cards, each
-     * variation of a card with a gnome. Each of them has the same amount of card.
+     * variation of a card with a gnome. Each of them has the same amount of cards.
      *
      * @param numberOfEachCard the number of each special card.
      * @return a {@link WegeDeck} for the playing board.
@@ -118,7 +112,8 @@ public class WegeDeck {
      * @return a deck contains cards for the game Wege.
      */
     public static WegeDeck createWegeDeck(int rows, int cols) {
-        WegeDeck wegeDeck = createStandardDeck();
+        WegeDeck wegeDeck = new WegeDeck();
+        insertStandardCards(wegeDeck);
         int difference = rows * cols - STANDARD_BOARD_TILES;
         // Both Land and Water cards need to be removed, hence the divide to 2.
         final int numberOfCards = Math.abs(difference / 2);
@@ -127,10 +122,39 @@ public class WegeDeck {
             removeWaterAndLandCardsFromDeck(wegeDeck, numberOfCards);
         } else if (difference > 0) {
             // If significant larger than the standard size.
-            addCardsToDeck(wegeDeck, numberOfCards);
+            addWaterAndLandCardsToDeck(wegeDeck, numberOfCards);
         }
         wegeDeck.shuffle();
         return wegeDeck;
+    }
+
+    /**
+     * Insert a collection of 40 standard cards to the given deck.
+     * List of standard cards:
+     *
+     * <ul>
+     *     <li>12 land cards without gnomes</li>
+     *     <li>12 water cards without gnomes</li>
+     *     <li>3 land cards with a land gnome on the path</li>
+     *     <li>2 land cards with a water gnome on one of the water corners</li>
+     *     <li>3 water cards with a water gnome on the stream</li>
+     *     <li>2 water cards with a land gnome on one of the land corners</li>
+     *     <li>3 cossack cards </li>
+     *     <li>3 bridge cards</li>
+     * </ul>
+     *
+     * @param wegeDeck the deck to add cards to.
+     */
+    private static void insertStandardCards(WegeDeck wegeDeck) {
+        // Gnome cards needs to be at the top for fast removal.
+        wegeDeck.addCardsToDeck(3, cardSupplier(WegeCard.CardType.LAND, GnomePos.PATH));
+        wegeDeck.addCardsToDeck(2, cardSupplier(WegeCard.CardType.LAND, GnomePos.CORNER));
+        wegeDeck.addCardsToDeck(3, cardSupplier(WegeCard.CardType.WATER, GnomePos.PATH));
+        wegeDeck.addCardsToDeck(2, cardSupplier(WegeCard.CardType.LAND, GnomePos.CORNER));
+        wegeDeck.addCardsToDeck(12, cardSupplier(WegeCard.CardType.WATER, null));
+        wegeDeck.addCardsToDeck(12, cardSupplier(WegeCard.CardType.LAND, null));
+        wegeDeck.addCardsToDeck(3, cardSupplier(WegeCard.CardType.COSSACK, null));
+        wegeDeck.addCardsToDeck(3, cardSupplier(WegeCard.CardType.BRIDGE, null));
     }
 
     /**
@@ -145,6 +169,7 @@ public class WegeDeck {
         int waterCardsRemoved = 0;
         Iterator<WegeCard> deckIterator = wegeDeck.cards.iterator();
         while (deckIterator.hasNext()) {
+            // If there are enough cards to be removed, stop.
             if (landCardsRemoved == numberOfCards
                     && waterCardsRemoved == numberOfCards) {
                 break;
@@ -153,10 +178,11 @@ public class WegeDeck {
             if (cardInDeck.hasGnome()) {
                 if (cardInDeck.getCardType() == WegeCard.CardType.LAND) {
                     landCardsRemoved++;
+                    deckIterator.remove();
                 } else if (cardInDeck.getCardType() == WegeCard.CardType.WATER) {
                     waterCardsRemoved++;
+                    deckIterator.remove();
                 }
-                deckIterator.remove();
             }
         }
     }
@@ -167,7 +193,7 @@ public class WegeDeck {
      * @param wegeDeck a Wege deck.
      * @param numberOfCards the number of each Land and Water cards.
      */
-    private static void addCardsToDeck(WegeDeck wegeDeck, int numberOfCards) {
+    private static void addWaterAndLandCardsToDeck(WegeDeck wegeDeck, int numberOfCards) {
         wegeDeck.addCardsToDeck(numberOfCards, cardSupplier(WegeCard.CardType.WATER, null));
         wegeDeck.addCardsToDeck(numberOfCards, cardSupplier(WegeCard.CardType.LAND, null));
     }
@@ -179,7 +205,7 @@ public class WegeDeck {
      * @param gnomePos the position of Gnome on the card.
      * @return a {@link Supplier} which supply the card based on cardType and gnomePos
      */
-    public static Supplier<WegeCard> cardSupplier(WegeCard.CardType cardType, GnomePos gnomePos) {
+    private static Supplier<WegeCard> cardSupplier(WegeCard.CardType cardType, GnomePos gnomePos) {
         if (gnomePos == null) return () -> new WegeCard(cardType, false, false);
         return switch (gnomePos) {
             case CORNER -> () -> new WegeCard(cardType, true, false);
