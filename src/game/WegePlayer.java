@@ -78,7 +78,7 @@ public class WegePlayer {
             playerMove = PlayerMove.PLACE;
         }
         if (playerMove != null) {
-            wegeGameMaster.trackPlayedCard(nextCard, row, col);
+            wegeGameMaster.trackPlayedCard(nextCard, this, row, col);
             cardPlayed.add(nextCard);
             return playerMove;
         } else {

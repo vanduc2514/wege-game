@@ -7,6 +7,7 @@ import java.util.*;
 /**
  * The Game Master of the game Wege. This master keeps a {@link #playingBoard} to help
  * maintain the game and track the {@link WegeCard} that are being played on the game board.
+ * Only him knows the game rule and the scoring of it.
  */
 public class WegeGameMaster {
 
@@ -33,11 +34,12 @@ public class WegeGameMaster {
     /**
      * Place given {@link WegeCard} on the playing board.
      *
-     * @param wegeCard the {@link WegeCard} to be placed.
-     * @param row      the row of this card on the playing board.
-     * @param col      the column of this card on the playing board.
+     * @param wegeCard   the {@link WegeCard} to be placed.
+     * @param wegePlayer
+     * @param row        the row of this card on the playing board.
+     * @param col        the column of this card on the playing board.
      */
-    public void trackPlayedCard(WegeCard wegeCard, int row, int col) {
+    public void trackPlayedCard(WegeCard wegeCard, WegePlayer wegePlayer, int row, int col) {
         playingBoard[row][col] = wegeCard;
         CardLocation location = new CardLocation(row, col);
         cardLocations.put(wegeCard, location);
@@ -123,21 +125,6 @@ public class WegeGameMaster {
             }
         }
         return false;
-    }
-
-    /**
-     * Find all adjacent cards for a given {@link WegeCard}.
-     *
-     * @param wegeCard a {@link WegeCard} in the playing board.
-     * @return all of {@link WegeCard} that is placed next to the given wege card.
-     * If there is no card available, return an empty list.
-     * @throws IllegalArgumentException if the wege card is not played on the board.
-     */
-    public List<WegeCard> findAdjacentCards(WegeCard wegeCard) {
-        CardLocation currentCardLocation = cardLocations.get(wegeCard);
-        if (currentCardLocation == null)
-            throw new IllegalArgumentException("The given card is not played yet!");
-        return findAdjacentCards(currentCardLocation.row(), currentCardLocation.col());
     }
 
     /**
@@ -305,4 +292,28 @@ public class WegeGameMaster {
      */
     private record CardLocation(int row, int col) {}
 
+    // Make circular list to check infinity of elements
+    // Tail point to Head.
+    private LinkedList<Intersection> intersection = new LinkedList<>();
+
+    LinkedList<Intersection> temp = new LinkedList<>();
+    public void endGame() {
+        Iterator<Intersection> intersectionIterator = intersection.iterator();
+        Intersection boardIntersection;
+        while (!(boardIntersection = intersectionIterator.next()).isCompleted()) {
+            // Not completed intersection.
+            Intersection notCompleted = boardIntersection;
+            // Add to the front of temp linked list
+            temp.add(notCompleted);
+            while (!temp.isEmpty()) {
+                // remove front of linked list
+                Intersection current = temp.pop();
+                // Set to true
+                current.setVisited(true);
+                // Current card of this intersection ?
+                WegeCard wegeCard;
+
+            }
+        }
+    }
 }
