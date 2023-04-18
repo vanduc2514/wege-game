@@ -1,15 +1,12 @@
 package ui;
 
 import game.*;
-import game.WegeCard;
-import game.WegeDeck;
-import game.WegeGameSetting;
-import game.WegePlayer;
-import game.IllegalMoveException;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
+import javafx.scene.layout.Background;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 
 import java.util.LinkedList;
 
@@ -104,6 +101,11 @@ public class WegeGameBox extends VBox {
                     case PLACE -> placeCard(nextButtonClicked, bottomPane);
                     case SWAP -> swapCard(nextButtonClicked, bottomPane);
                 }
+                if (currentPlayer.getPlayerType() == WegePlayer.PlayerType.LAND) {
+                    nextButtonClicked.setBackground(Background.fill(Color.RED));
+                } else if (currentPlayer.getPlayerType() == WegePlayer.PlayerType.WATER) {
+                    nextButtonClicked.setBackground(Background.fill(Color.BLUE));
+                }
             } catch (IllegalMoveException ignored) {
                 // TODO: Should display explanation why this player made the wrong move ?
             }
@@ -142,6 +144,7 @@ public class WegeGameBox extends VBox {
     private void setCardOnBoard(WegeButton boardButton, WegeCard wegeCard) {
         boardButton.setCard(wegeCard);
         bottomPane.displayPlayerType(wegePlayerMonitor.getQueuePlayer().getPlayerType());
+        boardButton.setBackground(Background.fill(Color.RED));
     }
 
 }
