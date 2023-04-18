@@ -15,9 +15,6 @@ import java.util.regex.Pattern;
  */
 public record WegeGameSetting(int rows, int cols, WegeDeck deck) {
 
-    /* Only accept maximum two-digit positive number start from 1. */
-    public static final Pattern VALID_POSITIVE_INTEGER_REGEX = Pattern.compile("^[1-9]$");
-
     /* The number of row for the standard playing board of the Wege game. */
     public static final int STANDARD_BOARD_ROWS = 6;
 
@@ -85,6 +82,9 @@ public record WegeGameSetting(int rows, int cols, WegeDeck deck) {
      * Helper class to help with handling arguments.
      */
     public static class CLIHelper {
+
+        /* Only accept maximum two-digit positive number start from 1. */
+        private static final Pattern VALID_POSITIVE_INTEGER_REGEX = Pattern.compile("^[1-9]$");
 
         /**
          * Validate each of arguments given to this application. Each of them should be
