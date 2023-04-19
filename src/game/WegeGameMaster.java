@@ -39,10 +39,16 @@ public class WegeGameMaster {
      * @param row        the row of this card on the playing board.
      * @param col        the column of this card on the playing board.
      */
-    public void trackPlayedCard(WegeCard wegeCard, WegePlayer wegePlayer, int row, int col) {
+    public void trackPlayedCard(WegePlayerCard wegeCard, WegePlayer wegePlayer, int row, int col) {
         playingBoard[row][col] = wegeCard;
         CardLocation location = new CardLocation(row, col);
         cardLocations.put(wegeCard, location);
+        List<Intersection> intersection = findAllIntersection(wegeCard);
+        intersection.forEach(i -> i.getCards().add(wegeCard));
+    }
+
+    private List<Intersection> findAllIntersection(WegePlayerCard wegeCard) {
+        throw new IllegalStateException("Not yet implemented!");
     }
 
     /**
@@ -292,28 +298,56 @@ public class WegeGameMaster {
      */
     private record CardLocation(int row, int col) {}
 
-    // Make circular list to check infinity of elements
-    // Tail point to Head.
-    private LinkedList<Intersection> intersection = new LinkedList<>();
+    public class Score {
+        // Make circular list to check infinity of elements
+        // Tail point to Head.
+        private LinkedList<Intersection> intersection = new LinkedList<>();
 
-    LinkedList<Intersection> temp = new LinkedList<>();
-    public void endGame() {
-        Iterator<Intersection> intersectionIterator = intersection.iterator();
-        Intersection boardIntersection;
-        while (!(boardIntersection = intersectionIterator.next()).isCompleted()) {
-            // Not completed intersection.
-            Intersection notCompleted = boardIntersection;
-            // Add to the front of temp linked list
-            temp.add(notCompleted);
-            while (!temp.isEmpty()) {
-                // remove front of linked list
-                Intersection current = temp.pop();
-                // Set to true
-                current.setVisited(true);
-                // Current card of this intersection ?
-                WegeCard wegeCard;
-
+        LinkedList<Intersection> temp = new LinkedList<>();
+        public void endGame() {
+            Iterator<Intersection> intersectionIterator = intersection.iterator();
+            Intersection boardIntersection;
+            while (!(boardIntersection = intersectionIterator.next()).isCompleted()) {
+                // Not completed intersection.
+                Intersection notCompleted = boardIntersection;
+                // Add to the front of temp linked list
+                temp.add(notCompleted);
+                List<Intersection> visited = new ArrayList<>();
+                while (!temp.isEmpty()) {
+                    // remove front of linked list
+                    Intersection current = temp.pop();
+                    // Set to true
+                    current.setVisited(true);
+                    // Collect all visited.
+                    visited.add(current);
+                    // For each of the cards, follow the path and count gnome
+                    List<WegePlayerCard> gnomeCards = new ArrayList<>();
+                    for (WegePlayerCard card : current.getCards()) {
+                        // If there is a gnome at this intersection
+                        if (card.hasGnome()) {
+                            gnomeCards.add(card);
+                        }
+                        if (card.isPlayedBySameType()) {
+                            Intersection otherSide = findTheOtherSide(card);
+                            if (!otherSide.isVisited()) {
+                                temp.add(otherSide);
+                            }
+                        }
+                    }
+                }
+                // 3. Once the list is empty, look for all the intersections with visited
+                // set to true but completed set to false.
+                for (Intersection intersection1 : visited) {
+                    intersection1.setCompleted(true);
+                    if (intersection1.touchEdge()) {
+                        // COunt all the edges
+                    }
+                }
             }
+        }
+
+        private Intersection findTheOtherSide(WegePlayerCard card) {
+            throw new IllegalStateException("Not yet implemented!");
         }
     }
 }

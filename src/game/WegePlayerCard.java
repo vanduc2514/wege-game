@@ -23,4 +23,15 @@ public class WegePlayerCard extends WegeCard {
         return playedBy;
     }
 
+    public boolean isPlayedBySameType() {
+        if (getCardType() == CardType.LAND
+                && getPlayedBy().getPlayerType() == WegePlayer.PlayerType.LAND) {
+            return true;
+        }
+        if (getCardType() == CardType.WATER
+              && getPlayedBy().getPlayerType() == WegePlayer.PlayerType.WATER) {
+            return true;
+        }
+        return getCardType() == CardType.BRIDGE;
+    }
 }

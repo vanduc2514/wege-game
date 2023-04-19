@@ -53,6 +53,10 @@ public class WegePlayer {
         return this.score;
     }
 
+    public void increaseGnome(int score) {
+        this.score += score;
+    }
+
     /**
      * Decide the next move and keep track all the cards played so far.
      *

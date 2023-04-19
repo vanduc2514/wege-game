@@ -1,5 +1,8 @@
 package game;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Intersection {
 
     private final Location location;
@@ -8,8 +11,11 @@ public class Intersection {
 
     private boolean completed;
 
+    private List<WegePlayerCard> cards;
+
     public Intersection(Location location) {
         this.location = location;
+        cards = new ArrayList<>();
     }
 
     public Location getLocation() {
@@ -32,4 +38,11 @@ public class Intersection {
         this.completed = completed;
     }
 
+    public List<WegePlayerCard> getCards() {
+        return cards;
+    }
+
+    public boolean touchEdge() {
+        throw new IllegalStateException("Not yet implemented!");
+    }
 }
