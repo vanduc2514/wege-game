@@ -14,6 +14,10 @@ public class WegeGameMaster {
     /* The 2 dimension Wege playing board. */
     private final WegeCard[][] playingBoard;
 
+    private final Intersection[][] boardIntersections;
+
+    private LinkedList<Intersection> allIntersections = new LinkedList<>();
+
     /**
      * The location (row, col) of Wege Cards on {@link #playingBoard}. This map is used
      * to find the location of a {@link WegeCard} without looping through the playing board.
@@ -29,6 +33,15 @@ public class WegeGameMaster {
     public WegeGameMaster(int rows, int cols) {
         this.playingBoard = new WegeCard[rows][cols];
         this.cardLocations = new HashMap<>(playingBoard.length);
+        // The number of intersections is plus 1 to cover all the board,
+        this.boardIntersections = new Intersection[rows + 1][cols + 1];
+        for (int row = 0; row < rows; row++) {
+            for (int col = 0; col < cols; col++) {
+                Intersection intersection = new Intersection(new Location(row, col));
+                this.allIntersections.add(intersection);
+                boardIntersections[row][col] = intersection;
+            }
+        }
     }
 
     /**
@@ -39,16 +52,60 @@ public class WegeGameMaster {
      * @param row        the row of this card on the playing board.
      * @param col        the column of this card on the playing board.
      */
-    public void trackPlayedCard(WegePlayerCard wegeCard, WegePlayer wegePlayer, int row, int col) {
+    public void trackPlayedCard(WegeCard wegeCard, WegePlayer wegePlayer, int row, int col) {
         playingBoard[row][col] = wegeCard;
+        // Use WegePlayerCard
         CardLocation location = new CardLocation(row, col);
         cardLocations.put(wegeCard, location);
-        List<Intersection> intersection = findAllIntersection(wegeCard);
-        intersection.forEach(i -> i.getCards().add(wegeCard));
+        List<Intersection> intersection = findAllIntersection(row, col);
+        intersection.forEach(i -> i.getCards().add((WegePlayerCard) wegeCard));
     }
 
-    private List<Intersection> findAllIntersection(WegePlayerCard wegeCard) {
-        throw new IllegalStateException("Not yet implemented!");
+    /**
+     * Find {@link Pos#TOP_LEFT}, {@link Pos#TOP_RIGHT}, {@link Pos#BOTTOM_RIGHT}, {@link Pos#BOTTOM_LEFT}
+     * Intersections of a given location of a wege card.
+     *
+     * @param row the row of the card on the playing board.
+     * @param col the column of the card on the playing board.
+     * @return all Intersections relate to this card.
+     */
+    private List<Intersection> findAllIntersection(int row, int col) {
+        Location topLeftLoc = new Location(row + 1, col);
+        Location topRightLoc = new Location(row + 1, col + 1);
+        Location bottomRightLoc = new Location(row, col + 1);
+        Location bottomLeftLoc = new Location(row, col);
+        return List.of(
+                boardIntersections[topLeftLoc.row()][topLeftLoc.col()],
+                boardIntersections[topRightLoc.row()][topRightLoc.col()],
+                boardIntersections[bottomRightLoc.row()][bottomRightLoc.col()],
+                boardIntersections[bottomRightLoc.row()][bottomLeftLoc.col()]
+        );
+    }
+
+    /**
+     * Find the relative Position of an Intersection in a card.
+     *
+     * @param intersectionLocation the location of the Intersection.
+     * @param cardLocation the location of the card
+     * @return the relative Position or return null if this Intersection
+     * is not belong to the card.
+     */
+    private Pos getPositionOnCard(Location intersectionLocation, Location cardLocation) {
+        int cardRow = cardLocation.row();
+        int cardCol = cardLocation.col();
+        if (intersectionLocation.row() == cardRow
+                && intersectionLocation.col() == cardCol + 1)
+            return Pos.TOP_LEFT;
+        if (intersectionLocation.row() == cardRow + 1
+                && intersectionLocation.col() == cardCol + 1)
+            return Pos.TOP_RIGHT;
+        if (intersectionLocation.row() == cardRow + 1
+                && intersectionLocation.col() == cardCol)
+            return Pos.BOTTOM_RIGHT;
+        if (intersectionLocation.row() == cardRow
+                && intersectionLocation.col() == cardCol)
+            return Pos.BOTTOM_LEFT;
+        return null;
     }
 
     /**

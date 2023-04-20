@@ -1,8 +1,15 @@
 package game;
 
+import javafx.geometry.Pos;
+
+import java.util.HashMap;
+import java.util.Map;
+
 public class WegePlayerCard extends WegeCard {
 
     private WegePlayer playedBy;
+
+    Map<Pos, Intersection> itscRelationPos;
 
     /**
      * Create a Wege game button
@@ -13,6 +20,7 @@ public class WegePlayerCard extends WegeCard {
      */
     public WegePlayerCard(CardType type, boolean hasGnome, boolean isPathGnome) {
         super(type, hasGnome, isPathGnome);
+        itscRelationPos = new HashMap<>(4);
     }
 
     public void setPlayedBy(WegePlayer playedBy) {
@@ -34,4 +42,32 @@ public class WegePlayerCard extends WegeCard {
         }
         return getCardType() == CardType.BRIDGE;
     }
+
+    public void setTopLeftIntersection(Intersection intersection) {
+        itscRelationPos.put(Pos.TOP_LEFT, intersection);
+    }
+
+    public void setTopRightIntersection(Intersection intersection) {
+        itscRelationPos.put(Pos.TOP_RIGHT, intersection);
+    }
+
+    public void setBottomRightIntersection(Intersection intersection) {
+        itscRelationPos.put(Pos.BOTTOM_RIGHT, intersection);
+    }
+
+    public void setBottomLeftIntersection(Intersection intersection) {
+        itscRelationPos.put(Pos.BOTTOM_LEFT, intersection);
+    }
+
+    public boolean isWater(Intersection intersection) {
+        for (Map.Entry<Pos, Intersection> entry : itscRelationPos.entrySet()) {
+            Pos pos = entry.getKey();
+            Intersection itsc = entry.getValue();
+            if (isWater(pos) && intersection == itsc) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }
