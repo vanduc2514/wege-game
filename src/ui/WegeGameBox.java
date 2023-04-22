@@ -3,7 +3,9 @@ package ui;
 import game.*;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
 import javafx.scene.Node;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -35,7 +37,7 @@ public class WegeGameBox extends VBox {
         wegePlayerMonitor = createPlayerMonitor(rows, cols);
         createView(rows, cols, wegeDeck);
         // UI Interactions when a player click a button on the playing board.
-        playingBoard.addButtonClickedChangedListener(getBoardButtonClickedListener(bottomPane));
+        playingBoard.setBoardButtonClickedHandler(getBoardButtonClickedHandler(bottomPane));
     }
 
     /**
@@ -95,16 +97,31 @@ public class WegeGameBox extends VBox {
             WegePlayer currentPlayer = wegePlayerMonitor.getCurrentPlayer();
             WegeCard nextCard = bottomPane.getNextCard();
             try {
-                WegePlayer.PlayerMove currentPlayerMove = currentPlayer.playCard(
+                WegePlayer.Move currentMove = currentPlayer.playCard(
                         nextCard, nextButtonClicked.getRow(), nextButtonClicked.getCol());
-                switch (currentPlayerMove) {
+                switch (currentMove) {
                     case PLACE -> placeCard(nextButtonClicked, bottomPane);
                     case SWAP -> swapCard(nextButtonClicked, bottomPane);
                 }
-                if (currentPlayer.getPlayerType() == WegePlayer.PlayerType.LAND) {
-                    nextButtonClicked.setBackground(Background.fill(Color.RED));
-                } else if (currentPlayer.getPlayerType() == WegePlayer.PlayerType.WATER) {
-                    nextButtonClicked.setBackground(Background.fill(Color.BLUE));
+            } catch (IllegalMoveException ignored) {
+                // TODO: Should display explanation why this player made the wrong move ?
+            }
+        };
+    }
+
+
+    private EventHandler<MouseEvent> getBoardButtonClickedHandler(WegeBottomPane bottomPane) {
+        return mouseClickedEvent -> {
+            WegeBoardButton boardButton = (WegeBoardButton) mouseClickedEvent.getSource();
+            if (bottomPane.getNextCard() == null) return;
+            WegePlayer currentPlayer = wegePlayerMonitor.getCurrentPlayer();
+            WegeCard nextCard = bottomPane.getNextCard();
+            try {
+                WegePlayer.Move currentMove = currentPlayer.playCard(
+                        nextCard, boardButton.getRow(), boardButton.getCol());
+                switch (currentMove) {
+                    case PLACE -> placeCard(boardButton, bottomPane);
+                    case SWAP -> swapCard(boardButton, bottomPane);
                 }
             } catch (IllegalMoveException ignored) {
                 // TODO: Should display explanation why this player made the wrong move ?

@@ -22,7 +22,7 @@ public class WegeGameMaster {
      * The location (row, col) of Wege Cards on {@link #playingBoard}. This map is used
      * to find the location of a {@link WegeCard} without looping through the playing board.
      */
-    private final Map<WegeCard, CardLocation> cardLocations;
+    private final Map<WegeCard, Location> cardLocations;
 
     /**
      * Create a new master for the game Wege.
@@ -55,10 +55,9 @@ public class WegeGameMaster {
     public void trackPlayedCard(WegeCard wegeCard, WegePlayer wegePlayer, int row, int col) {
         playingBoard[row][col] = wegeCard;
         // Use WegePlayerCard
-        CardLocation location = new CardLocation(row, col);
-        cardLocations.put(wegeCard, location);
-        List<Intersection> intersection = findAllIntersection(row, col);
-        intersection.forEach(i -> i.getCards().add((WegePlayerCard) wegeCard));
+        cardLocations.put(wegeCard, new Location(row, col));
+//        List<Intersection> intersection = findAllIntersection(row, col);
+//        intersection.forEach(i -> i.getCards().add(wegeCard));
     }
 
     /**
@@ -108,126 +107,109 @@ public class WegeGameMaster {
         return null;
     }
 
+    public WegePlayer.Move nextMove(WegeCard nextCard, int row, int col) throws IllegalMoveException {
+        WegeCard wegeCard = findWegeCard(row, col);
+        // If there is no card, it's a placement
+        // otherwise, it's a swap
+        if (wegeCard == null && isLegalRegularCardMove(nextCard, row, col)) {
+            return WegePlayer.Move.PLACE;
+        } else if (wegeCard != null
+                && isLegalBridgeCardMove(nextCard, row, col)) {
+            return WegePlayer.Move.SWAP;
+        }
+        throw new IllegalMoveException();
+    }
+
     /**
-     * Check if the next card in the deck is able to place at a location (row, col) on the playing board.
      * The rules are:
      *
      * <ul>
      *     <li>
-     *         If the next card is a {@link WegeCard.CardType#BRIDGE}
-     *         or a {@link WegeCard.CardType#COSSACK}, it can be placed
-     *         next to any cards.
+     *         The first card played can go anywhere.
      *     </li>
      *     <li>
-     *         If the next card is a {@link WegeCard.CardType#LAND}
-     *         or a {@link WegeCard.CardType#WATER}, it can only placed
-     *         next to a card with the same type, or next to a
-     *         {@link WegeCard.CardType#BRIDGE}
+     *         Each additional card played must be placed adjacent to
+     *         an existing card, either horizontally or vertically.
+     *     </li>
+     *     <li>
+     *         The land and water on the card must match with the land/water
+     *         of the card it is placed next to. Water cannot connect to land
+     *         and land cannot connect to water.
+     *     </li>
+     *     <li>
+     *
      *     </li>
      * </ul>
      *
      * @param nextCard the next card in the deck.
      * @param row the location (row) to place on the playing board.
      * @param col the location (col) to place on the playing board.
-     * @return true if the next card can be placed on the target location. Otherwise, return false.
+     * @return true if the next card can be played on the target location.
+     * Otherwise, return false.
      */
-    public boolean isLegalPlacement(WegeCard nextCard, int row, int col) {
-        List<WegeCard> adjacentCards = findAdjacentCards(row, col);
-        switch (nextCard.getCardType()) {
-            case COSSACK, BRIDGE -> {
-                if (!adjacentCards.isEmpty()) return true;
-            }
-            case LAND, WATER -> {
-                for (WegeCard adjacentCard : adjacentCards) {
-                    WegeCard.CardType adjacentCardType = adjacentCard.getCardType();
-                    if (nextCard.getCardType() == adjacentCardType
-                            || adjacentCardType == WegeCard.CardType.BRIDGE)
-                        return true;
-                }
-            }
+    public boolean isLegalRegularCardMove(WegeCard nextCard, int row, int col) {
+        WegeCard adjacentCard;
+        Pos adjacentCardContactPos;
+        Pos nextCardContactPos;
+            if ((adjacentCard = findLeftCard(row, col)) != null) {
+            adjacentCardContactPos = Pos.TOP_RIGHT;
+            nextCardContactPos = Pos.TOP_LEFT;
+        } else if ((adjacentCard = findBottomCard(row, col)) != null) {
+            adjacentCardContactPos = Pos.TOP_LEFT;
+            nextCardContactPos = Pos.BOTTOM_LEFT;
+        } else if ((adjacentCard = findRightCard(row, col)) != null) {
+            adjacentCardContactPos = Pos.TOP_LEFT;
+            nextCardContactPos = Pos.TOP_RIGHT;
+        } else if ((adjacentCard = findTopCard(row, col)) != null) {
+            adjacentCardContactPos = Pos.TOP_LEFT;
+            nextCardContactPos = Pos.BOTTOM_LEFT;
+        } else {
+            return false;
         }
-        return false;
+        return adjacentCard.isWater(adjacentCardContactPos) == nextCard.isWater(nextCardContactPos);
     }
 
     /**
-     * Check if the card {@link WegeCard.CardType#BRIDGE} can be swapped with a card on the playing board.
      * The rules are:
      *
      * <ul>
      *     <li>
-     *         If the card on the playing board is a {@link WegeCard.CardType#LAND}
-     *         or a {@link WegeCard.CardType#WATER}, it can be swapped as long as it does
-     *         not have a gnome or the gnome does not belong to a facing group.
-     *     </li>
-     *     <li>
-     *         If the card on the playing board is the same kind, it can be swapped.
-     *     </li>
-     *     <li>
-     *         If the card on the playing board is {@link WegeCard.CardType#COSSACK},
-     *         it cannot be swapped.
-     *     </li>
-     *     <li>
-     *         If there is no card existed in the playing board, it cannot be swapped.
+     *         There are special "bridge" cards. With a bridge card, you can either
+     *         play it like a regular card, or you can use it to replace an existing
+     *         water or land card. But:
+     *         <ul>
+     *             <li>
+     *                 A bridge card cannot replace a cossack card.
+     *             </li>
+     *             <li>
+     *               A bridge card cannot replace a land or water card
+     *               if that card has a gnome AND that gnome is part of a group of "facing" gnomes.
+     *             </li>
+     *         </ul>
      *     </li>
      * </ul>
      *
-     * @param row the row of the card to be swapped on the playing board
-     * @param col the column of the card to be swapped on the playing board
-     * @return true if the card on the playing board can be swapped. Otherwise, return false.
+     * @param row the location (row) to place on the playing board.
+     * @param col the location (col) to place on the playing board.
+     * @return true if the next card can be played on the target location.
      */
-    public boolean isLegalSwap(int row, int col) {
+    // Redo this to have specific logic for bridge card.
+    public boolean isLegalBridgeCardMove(WegeCard wegeCard, int row, int col) {
         WegeCard cardOnBoard = findWegeCard(row, col);
-        if (cardOnBoard == null) return false;
-        switch (cardOnBoard.getCardType()) {
-            case LAND, WATER -> {
-                if (!cardOnBoard.hasGnome() || findGnomeGroupMembers(cardOnBoard).isEmpty())
-                    return true;
-            }
-            case BRIDGE -> {
-                return true;
-            }
+        WegeCard.CardType cardOnBoardType;
+        if (cardOnBoard == null
+                || (cardOnBoardType = cardOnBoard.getCardType()) == WegeCard.CardType.COSSACK)
+            return false;
+        boolean legalSwap = isLegalRegularCardMove(wegeCard, row, col);
+        if (!legalSwap) {
+            return false;
+        }
+        if (cardOnBoardType == WegeCard.CardType.WATER
+                || cardOnBoardType == WegeCard.CardType.LAND) {
+            if (!cardOnBoard.hasGnome()) return true;
+            return findGnomeGroupMembers(row, col).isEmpty();
         }
         return false;
-    }
-
-    /**
-     * Find all adjacent cards for a given location (row, col).
-     *
-     * @param row the row on the playing board.
-     * @param col the column on the playing board.
-     * @return all of {@link WegeCard} that is placed next to the given location.
-     * If there is no card available, return an empty list.
-     */
-    private List<WegeCard> findAdjacentCards(int row, int col) {
-        List<WegeCard> adjacentCards = new ArrayList<>();
-        adjacentCards.add(findTopCard(row, col));
-        adjacentCards.add(findRightCard(row, col));
-        adjacentCards.add(findBottomCard(row, col));
-        adjacentCards.add(findLeftCard(row, col));
-        // all null needs to be removed to avoid NullPointerException.
-        adjacentCards.removeAll(Collections.singletonList(null));
-        return adjacentCards;
-    }
-
-    /**
-     * Find all card that is possible to form a Gnome group for the given card.
-     * Look for the direction where the Gnome is faced at.
-     *
-     * @param wegeCard the {@link WegeCard} that contains a Gnome
-     * @return all members of the Gnome Group. If no member is found, return
-     * an empty list.
-     * @throws IllegalArgumentException if the given card does not have a Gnome
-     *                                  or the card is not played on the board.
-     */
-    public List<WegeCard> findGnomeGroupMembers(WegeCard wegeCard) {
-        CardLocation currentCardLocation = cardLocations.get(wegeCard);
-        if (currentCardLocation == null) {
-            throw new IllegalArgumentException("The given card is not played yet!");
-        }
-        if (!wegeCard.hasGnome()) {
-            throw new IllegalArgumentException("The given card does not have a Gnome!");
-        }
-        return findGnomeGroupMembers(currentCardLocation.row(), currentCardLocation.col());
     }
 
     /**
@@ -245,25 +227,25 @@ public class WegeGameMaster {
         if (wegeCard == null) return groupMembers;
         switch (wegeCard.getGnomePosition()) {
             case TOP_LEFT -> {
-                WegeCard topCard = findTopCard(row, col);
+                WegeCard topCard = findBottomCard(row, col);
                 if (isInGnomeGroup(topCard, Pos.BOTTOM_LEFT)) groupMembers.add(topCard);
                 WegeCard leftCard = findLeftCard(row, col);
                 if (isInGnomeGroup(leftCard, Pos.TOP_RIGHT)) groupMembers.add(leftCard);
             }
             case TOP_RIGHT -> {
-                WegeCard topCard = findTopCard(row, col);
+                WegeCard topCard = findBottomCard(row, col);
                 if (isInGnomeGroup(topCard, Pos.BOTTOM_RIGHT)) groupMembers.add(topCard);
                 WegeCard rightCard = findRightCard(row, col);
                 if (isInGnomeGroup(rightCard, Pos.TOP_LEFT)) groupMembers.add(rightCard);
             }
             case BOTTOM_RIGHT -> {
-                WegeCard bottomCard = findBottomCard(row, col);
+                WegeCard bottomCard = findTopCard(row, col);
                 if (isInGnomeGroup(bottomCard, Pos.TOP_RIGHT)) groupMembers.add(bottomCard);
                 WegeCard rightCard = findRightCard(row, col);
                 if (isInGnomeGroup(rightCard, Pos.BOTTOM_LEFT)) groupMembers.add(rightCard);
             }
             case BOTTOM_LEFT -> {
-                WegeCard bottomCard = findBottomCard(row, col);
+                WegeCard bottomCard = findTopCard(row, col);
                 if (isInGnomeGroup(bottomCard, Pos.TOP_LEFT)) groupMembers.add(bottomCard);
                 WegeCard leftCard = findLeftCard(row, col);
                 if (isInGnomeGroup(leftCard, Pos.BOTTOM_RIGHT)) groupMembers.add(leftCard);
@@ -289,6 +271,17 @@ public class WegeGameMaster {
     }
 
     /**
+     * Find the Left card of the current card.
+     *
+     * @param row the row on the playing board.
+     * @param col the column on the playing board.
+     * @return a card on the playing board or null if the card can not be found.
+     */
+    private WegeCard findLeftCard(int row, int col) {
+        return findWegeCard(row, col - 1);
+    }
+
+    /**
      * Find the Top card of the current card.
      *
      * @param row the row on the playing board.
@@ -296,7 +289,7 @@ public class WegeGameMaster {
      * @return a card on the playing board or null if the card can not be found.
      */
     private WegeCard findTopCard(int row, int col) {
-        return findWegeCard(row + 1, col);
+        return findWegeCard(row - 1, col);
     }
 
     /**
@@ -318,18 +311,7 @@ public class WegeGameMaster {
      * @return a card on the playing board or null if the card can not be found.
      */
     private WegeCard findBottomCard(int row, int col) {
-        return findWegeCard(row - 1, col);
-    }
-
-    /**
-     * Find the Left card of the current card.
-     *
-     * @param row the row on the playing board.
-     * @param col the column on the playing board.
-     * @return a card on the playing board or null if the card can not be found.
-     */
-    private WegeCard findLeftCard(int row, int col) {
-        return findWegeCard(row, col - 1);
+        return findWegeCard(row + 1, col);
     }
 
     /**
@@ -346,14 +328,6 @@ public class WegeGameMaster {
             return null;
         }
     }
-
-    /**
-     * Record class to represent location of a card in the playing board (row, col).
-     *
-     * @param row the row of this location
-     * @param col the column of this location
-     */
-    private record CardLocation(int row, int col) {}
 
     public class Score {
         // Make circular list to check infinity of elements

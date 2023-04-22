@@ -1,8 +1,6 @@
 package ui;
 
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ChangeListener;
+import javafx.event.EventHandler;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 
@@ -11,8 +9,8 @@ import javafx.scene.layout.GridPane;
  */
 public class WegePlayingBoardPane extends GridPane {
 
-    /* Dynamic property which reflect the button being clicked on this board */
-    private final ObjectProperty<WegeBoardButton> buttonClicked;
+    /* Handler for mouse click to a board button. */
+    private EventHandler<MouseEvent> boardButtonHandler;
 
     /**
      * Create a new playing board for the game Wege.
@@ -21,18 +19,11 @@ public class WegePlayingBoardPane extends GridPane {
      * @param cols the number of column for the playing board of the Wege Game
      */
     public WegePlayingBoardPane(int rows, int cols) {
-        buttonClicked = new SimpleObjectProperty<>();
         createPlayingBoard(rows, cols);
     }
 
-    /**
-     * Add a listener when mouse click to a button on the playing board.
-     *
-     * @param buttonClickedChangedListener listener which listen when new button clicked
-     *                                     is set.
-     */
-    public void addButtonClickedChangedListener(ChangeListener<WegeBoardButton> buttonClickedChangedListener) {
-        buttonClicked.addListener(buttonClickedChangedListener);
+    public void setBoardButtonClickedHandler(EventHandler<MouseEvent> boardButtonHandler) {
+        this.boardButtonHandler = boardButtonHandler;
     }
 
     /**
@@ -61,7 +52,10 @@ public class WegePlayingBoardPane extends GridPane {
     private WegeBoardButton createBoardButton(int row, int col) {
         WegeBoardButton boardButton = new WegeBoardButton(100, 100, row, col);
         boardButton.addEventHandler(MouseEvent.MOUSE_CLICKED,
-                mouseClickedEvent -> buttonClicked.set(boardButton));
+                mouseClickedEvent -> {
+                    if (boardButtonHandler != null)
+                        boardButtonHandler.handle(mouseClickedEvent);
+                });
         return boardButton;
     }
 

@@ -10,7 +10,7 @@ import java.util.LinkedList;
 public class WegePlayer {
 
     /* The possible moves of a player. */
-    public enum PlayerMove {PLACE, SWAP}
+    public enum Move {PLACE, SWAP}
 
     /* The possible types player of the Wege Game. */
     public enum PlayerType {LAND, WATER}
@@ -63,31 +63,21 @@ public class WegePlayer {
      * @param nextCard the card that this player receive from the deck.
      * @param row the row on the playing board to place the next card.
      * @param col the col on the playing board to place the next card.
-     * @return {@link PlayerMove} after a decision is made. or return null
+     * @return {@link Move} after a decision is made. or return null
      * @throws IllegalMoveException if this player move is illegal.
      */
-    public PlayerMove playCard(WegeCard nextCard, int row, int col) throws IllegalMoveException {
-        PlayerMove playerMove = null;
+    public Move playCard(WegeCard nextCard, int row, int col) throws IllegalMoveException {
+        Move move;
+        // If there is no card played yet, place the card.
         if (cardPlayed.isEmpty()) {
-            playerMove = PlayerMove.PLACE;
-        } else if (nextCard.getCardType() == WegeCard.CardType.BRIDGE
-                // ask the game master if this player
-                // can swap with the card on the board ?
-                && wegeGameMaster.isLegalSwap(row, col)) {
-            playerMove = PlayerMove.SWAP;
-        } else if (
-                // ask the game master if this player
-                // can place the card on the board ?
-                wegeGameMaster.isLegalPlacement(nextCard, row, col)) {
-            playerMove = PlayerMove.PLACE;
-        }
-        if (playerMove != null) {
-            wegeGameMaster.trackPlayedCard(nextCard, this, row, col);
-            cardPlayed.add(nextCard);
-            return playerMove;
+            move = Move.PLACE;
         } else {
-            throw new IllegalMoveException("Player made an illegal move");
-        }
+            // If not, ask the game master what should be the next move
+            move = wegeGameMaster.nextMove(nextCard, row, col);
+        };
+        wegeGameMaster.trackPlayedCard(nextCard, this, row, col);
+        cardPlayed.add(nextCard);
+        return move;
     }
 
     /**
