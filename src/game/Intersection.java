@@ -5,6 +5,10 @@ import java.util.Set;
 
 public class Intersection {
 
+    private final int x;
+
+    private final int y;
+
     private final Location location;
 
     private boolean visited;
@@ -25,7 +29,15 @@ public class Intersection {
 
     public Intersection(Location location) {
         this.location = location;
+        this.x = 0;
+        this.y = 0;
         cards = new HashSet<>();
+    }
+
+    public Intersection(int x, int y) {
+        this.location = null;
+        this.x = x;
+        this.y = y;
     }
 
     public Location getLocation() {
@@ -52,4 +64,11 @@ public class Intersection {
         return cards;
     }
 
+    public int getX() {
+        return this.x;
+    }
+
+    public int getY() {
+        return this.y;
+    }
 }

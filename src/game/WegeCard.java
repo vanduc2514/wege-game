@@ -12,6 +12,26 @@ import java.util.NoSuchElementException;
  */
 public class WegeCard {
 
+  private int row;
+
+  private int col;
+
+  public void setRow(int row) {
+    this.row = row;
+  }
+
+  public int getRow() {
+    return row;
+  }
+
+  public void setCol(int col) {
+    this.col = col;
+  }
+
+  public int getCol() {
+    return col;
+  }
+
   private Map<Intersection, Pos> intersections;
 
   public void setIntersections(Map<Intersection, Pos> intersections) {

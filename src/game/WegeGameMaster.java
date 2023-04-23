@@ -63,7 +63,6 @@ public class WegeGameMaster {
         cardsPlayed++;
         var intersection = findAllIntersection(row, col);
         if (card != null) {
-            // TODO: If the card is bridge, remove all references.
             intersection.keySet().forEach(e -> {
                 e.getCards().removeIf(c -> c == card);
             });
@@ -108,6 +107,7 @@ public class WegeGameMaster {
                 && isLegalBridgeCardMove(nextCard, row, col)) {
             return Move.SWAP;
         }
+
         return null;
     }
 
@@ -212,6 +212,7 @@ public class WegeGameMaster {
      * @return all members of the Gnome Group. If no member is found, return
      * an empty list.
      */
+    // TODO: refactor
     private List<WegeCard> findGnomeGroupMembers(int row, int col) {
         List<WegeCard> groupMembers = new ArrayList<>();
         WegeCard wegeCard = findWegeCard(row, col);

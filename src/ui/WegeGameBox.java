@@ -69,9 +69,14 @@ public class WegeGameBox extends VBox {
                 wegeGameMaster.endGame();
                 return;
             }
-            WegeBoardButton boardButton = (WegeBoardButton) mouseClickedEvent.getSource();
             if (bottomPane.getNextCard() == null) return;
+            WegeBoardButton boardButton = (WegeBoardButton) mouseClickedEvent.getSource();
             WegeCard nextCard = bottomPane.getNextCard();
+            if (boardButton.getCard() == null) {
+                // Check legal placement
+            } else {
+                // Check legal swap
+            }
             WegeGameMaster.Move currentMove = wegeGameMaster.nextMove(
                     nextCard, boardButton.getRow(), boardButton.getCol());
             if (Objects.requireNonNull(currentMove) == WegeGameMaster.Move.PLACE) {
