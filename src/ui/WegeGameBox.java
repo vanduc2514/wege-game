@@ -24,7 +24,7 @@ public class WegeGameBox extends VBox {
     private WegeBottomPane bottomPane;
 
     /* Track players of a Wege Game. */
-    private final WegePlayerMonitor wegePlayerMonitor;
+    private final WegeGameMaster wegeGameMaster;
 
     /**
      * Create a new Wege Game.
@@ -34,10 +34,8 @@ public class WegeGameBox extends VBox {
      * @param wegeDeck the dek contains wege cards for this game.
      */
     public WegeGameBox(int rows, int cols, WegeDeck wegeDeck) {
-        wegePlayerMonitor = createPlayerMonitor(rows, cols);
+        wegeGameMaster = new WegeGameMaster(rows, cols);
         createView(rows, cols, wegeDeck);
-        // UI Interactions when a player click a button on the playing board.
-        playingBoard.setBoardButtonClickedHandler(getBoardButtonClickedHandler(bottomPane));
     }
 
     /**
@@ -50,24 +48,6 @@ public class WegeGameBox extends VBox {
     }
 
     /**
-     * Create a player monitor to track the players of this game.
-     *
-     * @param rows the number of row for the playing board of the Wege Game
-     * @param cols the number of column for the playing board of the Wege Game
-     * @return a monitor to track the turn of the player.
-     */
-    private WegePlayerMonitor createPlayerMonitor(int rows, int cols) {
-        final WegePlayerMonitor wegePlayerMonitor;
-        WegeGameMaster wegeGameMaster = new WegeGameMaster(rows, cols);
-        WegePlayer.WegePlayerBuilder wegePlayerBuilder = new WegePlayer.WegePlayerBuilder(wegeGameMaster);
-        LinkedList<WegePlayer> players = new LinkedList<>();
-        players.add(wegePlayerBuilder.buildPlayer(WegePlayer.PlayerType.LAND));
-        players.add(wegePlayerBuilder.buildPlayer(WegePlayer.PlayerType.WATER));
-        wegePlayerMonitor = new WegePlayerMonitor(players);
-        return wegePlayerMonitor;
-    }
-
-    /**
      * Create a view for the Wege Game.
      *
      * @param rows         the number of row for the playing board of the Wege Game
@@ -76,12 +56,14 @@ public class WegeGameBox extends VBox {
      */
     private void createView(int rows, int cols, WegeDeck startingDeck) {
         bottomPane = new WegeBottomPane(startingDeck);
+        bottomPane.setEndGameEvent(event -> wegeGameMaster.endGame());
         playingBoard = new WegePlayingBoardPane(rows, cols);
+        // UI Interactions when a player click a button on the playing board.
+        playingBoard.setBoardButtonClickedHandler(getBoardButtonClickedHandler(bottomPane));
         ObservableList<Node> children = getChildren();
         children.add(playingBoard);
         children.add(bottomPane);
         bottomPane.displayPlayerScore(0);
-        bottomPane.displayPlayerType(wegePlayerMonitor.getQueuePlayer().getPlayerType());
     }
 
     /**
@@ -94,7 +76,7 @@ public class WegeGameBox extends VBox {
     private ChangeListener<WegeBoardButton> getBoardButtonClickedListener(WegeBottomPane bottomPane) {
         return (observable, previousButtonClicked, nextButtonClicked) -> {
             if (bottomPane.getNextCard() == null) return;
-            WegePlayer currentPlayer = wegePlayerMonitor.getCurrentPlayer();
+            WegePlayer currentPlayer = wegeGameMaster.getCurrentPlayer();
             WegeCard nextCard = bottomPane.getNextCard();
             try {
                 WegePlayer.Move currentMove = currentPlayer.playCard(
@@ -112,9 +94,12 @@ public class WegeGameBox extends VBox {
 
     private EventHandler<MouseEvent> getBoardButtonClickedHandler(WegeBottomPane bottomPane) {
         return mouseClickedEvent -> {
+            if (wegeGameMaster.isGameEnd()) {
+                wegeGameMaster.endGame();
+            }
             WegeBoardButton boardButton = (WegeBoardButton) mouseClickedEvent.getSource();
             if (bottomPane.getNextCard() == null) return;
-            WegePlayer currentPlayer = wegePlayerMonitor.getCurrentPlayer();
+            WegePlayer currentPlayer = wegeGameMaster.getCurrentPlayer();
             WegeCard nextCard = bottomPane.getNextCard();
             try {
                 WegePlayer.Move currentMove = currentPlayer.playCard(
@@ -160,8 +145,7 @@ public class WegeGameBox extends VBox {
      */
     private void setCardOnBoard(WegeButton boardButton, WegeCard wegeCard) {
         boardButton.setCard(wegeCard);
-        bottomPane.displayPlayerType(wegePlayerMonitor.getQueuePlayer().getPlayerType());
-        boardButton.setBackground(Background.fill(Color.RED));
+//        bottomPane.displayPlayerType(wegeGameMaster.getQueuePlayer().getPlayerType());
     }
 
 }

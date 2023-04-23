@@ -1,7 +1,8 @@
 package game;
 
-import java.util.ArrayList;
-import java.util.List;
+import javafx.geometry.Pos;
+
+import java.util.*;
 
 public class Intersection {
 
@@ -11,11 +12,24 @@ public class Intersection {
 
     private boolean completed;
 
-    private List<WegePlayerCard> cards;
+    private WegeCard.CardType intersectionType;
+
+    private Map<WegeCard, Pos> cardsPos;
+
+    private Set<WegeCard> cards;
+
+    public void setIntersectionType(WegeCard.CardType intersectionType) {
+        this.intersectionType = intersectionType;
+    }
+
+    public WegeCard.CardType getIntersectionType() {
+        return intersectionType;
+    }
 
     public Intersection(Location location) {
         this.location = location;
-        cards = new ArrayList<>();
+        cardsPos = new HashMap<>();
+        cards = new HashSet<>();
     }
 
     public Location getLocation() {
@@ -38,8 +52,12 @@ public class Intersection {
         this.completed = completed;
     }
 
-    public List<WegePlayerCard> getCards() {
+    public Set<WegeCard> getCards() {
         return cards;
+    }
+
+    public void updatePosMap(WegeCard wegeCard, Pos position) {
+        cardsPos.put(wegeCard, position);
     }
 
     public boolean touchEdge() {

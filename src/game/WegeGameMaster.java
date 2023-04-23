@@ -18,11 +18,11 @@ public class WegeGameMaster {
 
     private LinkedList<Intersection> allIntersections = new LinkedList<>();
 
-    /**
-     * The location (row, col) of Wege Cards on {@link #playingBoard}. This map is used
-     * to find the location of a {@link WegeCard} without looping through the playing board.
-     */
-    private final Map<WegeCard, Location> cardLocations;
+    private WegePlayerMonitor wegePlayerMonitor;
+
+    private int cardsPlayed;
+
+    private final int totalCards;
 
     /**
      * Create a new master for the game Wege.
@@ -31,33 +31,60 @@ public class WegeGameMaster {
      * @param cols number of columns for the playing board.
      */
     public WegeGameMaster(int rows, int cols) {
+        this.totalCards = rows * cols;
         this.playingBoard = new WegeCard[rows][cols];
-        this.cardLocations = new HashMap<>(playingBoard.length);
         // The number of intersections is plus 1 to cover all the board,
         this.boardIntersections = new Intersection[rows + 1][cols + 1];
-        for (int row = 0; row < rows; row++) {
-            for (int col = 0; col < cols; col++) {
+        for (int row = 0; row < rows + 1; row++) {
+            for (int col = 0; col < cols + 1; col++) {
                 Intersection intersection = new Intersection(new Location(row, col));
                 this.allIntersections.add(intersection);
                 boardIntersections[row][col] = intersection;
             }
         }
+        // TODO: Refactor.
+        WegePlayer.WegePlayerBuilder builder = new WegePlayer.WegePlayerBuilder(this);
+        WegePlayer waterPlayer = builder.buildPlayer(WegePlayer.PlayerType.WATER);
+        WegePlayer landPlayer = builder.buildPlayer(WegePlayer.PlayerType.LAND);
+        LinkedList<WegePlayer> players = new LinkedList<>();
+        players.add(waterPlayer);
+        players.add(landPlayer);
+        wegePlayerMonitor = new WegePlayerMonitor(players);
     }
+
+    public boolean isGameEnd() {
+        return cardsPlayed >= totalCards;
+    }
+
+
 
     /**
      * Place given {@link WegeCard} on the playing board.
      *
      * @param wegeCard   the {@link WegeCard} to be placed.
-     * @param wegePlayer
      * @param row        the row of this card on the playing board.
      * @param col        the column of this card on the playing board.
      */
-    public void trackPlayedCard(WegeCard wegeCard, WegePlayer wegePlayer, int row, int col) {
+    public void trackPlayedCard(WegeCard wegeCard, int row, int col) {
+        WegeCard card = playingBoard[row][col];
         playingBoard[row][col] = wegeCard;
-        // Use WegePlayerCard
-        cardLocations.put(wegeCard, new Location(row, col));
-//        List<Intersection> intersection = findAllIntersection(row, col);
-//        intersection.forEach(i -> i.getCards().add(wegeCard));
+        cardsPlayed++;
+        var intersection = findAllIntersection(row, col);
+        if (card != null) {
+            // TODO: If the card is bridge, remove all references.
+            intersection.keySet().forEach(e -> {
+                e.getCards().removeIf(c -> c == card);
+            });
+        }
+        intersection.forEach((k , v) -> {
+            if (wegeCard.isLand(v)) {
+                k.setIntersectionType(WegeCard.CardType.LAND);
+            } else {
+                k.setIntersectionType(WegeCard.CardType.WATER);
+            }
+        });
+        wegeCard.setIntersections(intersection);
+        intersection.keySet().forEach(i -> i.getCards().add(wegeCard));
     }
 
     /**
@@ -68,43 +95,13 @@ public class WegeGameMaster {
      * @param col the column of the card on the playing board.
      * @return all Intersections relate to this card.
      */
-    private List<Intersection> findAllIntersection(int row, int col) {
-        Location topLeftLoc = new Location(row + 1, col);
-        Location topRightLoc = new Location(row + 1, col + 1);
-        Location bottomRightLoc = new Location(row, col + 1);
-        Location bottomLeftLoc = new Location(row, col);
-        return List.of(
-                boardIntersections[topLeftLoc.row()][topLeftLoc.col()],
-                boardIntersections[topRightLoc.row()][topRightLoc.col()],
-                boardIntersections[bottomRightLoc.row()][bottomRightLoc.col()],
-                boardIntersections[bottomRightLoc.row()][bottomLeftLoc.col()]
+    private Map<Intersection, Pos> findAllIntersection(int row, int col) {
+        return Map.ofEntries(
+                Map.entry(boardIntersections[row][col], Pos.TOP_LEFT),
+                Map.entry(boardIntersections[row][col + 1], Pos.TOP_RIGHT),
+                Map.entry(boardIntersections[row + 1][col], Pos.BOTTOM_LEFT),
+                Map.entry(boardIntersections[row + 1][col + 1], Pos.BOTTOM_RIGHT)
         );
-    }
-
-    /**
-     * Find the relative Position of an Intersection in a card.
-     *
-     * @param intersectionLocation the location of the Intersection.
-     * @param cardLocation the location of the card
-     * @return the relative Position or return null if this Intersection
-     * is not belong to the card.
-     */
-    private Pos getPositionOnCard(Location intersectionLocation, Location cardLocation) {
-        int cardRow = cardLocation.row();
-        int cardCol = cardLocation.col();
-        if (intersectionLocation.row() == cardRow
-                && intersectionLocation.col() == cardCol + 1)
-            return Pos.TOP_LEFT;
-        if (intersectionLocation.row() == cardRow + 1
-                && intersectionLocation.col() == cardCol + 1)
-            return Pos.TOP_RIGHT;
-        if (intersectionLocation.row() == cardRow + 1
-                && intersectionLocation.col() == cardCol)
-            return Pos.BOTTOM_RIGHT;
-        if (intersectionLocation.row() == cardRow
-                && intersectionLocation.col() == cardCol)
-            return Pos.BOTTOM_LEFT;
-        return null;
     }
 
     public WegePlayer.Move nextMove(WegeCard nextCard, int row, int col) throws IllegalMoveException {
@@ -114,6 +111,7 @@ public class WegeGameMaster {
         if (wegeCard == null && isLegalRegularCardMove(nextCard, row, col)) {
             return WegePlayer.Move.PLACE;
         } else if (wegeCard != null
+                && wegeCard.getCardType() == WegeCard.CardType.BRIDGE
                 && isLegalBridgeCardMove(nextCard, row, col)) {
             return WegePlayer.Move.SWAP;
         }
@@ -329,56 +327,131 @@ public class WegeGameMaster {
         }
     }
 
-    public class Score {
-        // Make circular list to check infinity of elements
-        // Tail point to Head.
-        private LinkedList<Intersection> intersection = new LinkedList<>();
+    public WegePlayer getCurrentPlayer() {
+        return wegePlayerMonitor.getCurrentPlayer();
+    }
 
+    public WegePlayer getQueuePlayer() {
+        return wegePlayerMonitor.getQueuePlayer();
+    }
+
+    public void endGame() {
         LinkedList<Intersection> temp = new LinkedList<>();
-        public void endGame() {
-            Iterator<Intersection> intersectionIterator = intersection.iterator();
-            Intersection boardIntersection;
-            while (!(boardIntersection = intersectionIterator.next()).isCompleted()) {
-                // Not completed intersection.
-                Intersection notCompleted = boardIntersection;
-                // Add to the front of temp linked list
-                temp.add(notCompleted);
-                List<Intersection> visited = new ArrayList<>();
-                while (!temp.isEmpty()) {
-                    // remove front of linked list
-                    Intersection current = temp.pop();
-                    // Set to true
-                    current.setVisited(true);
-                    // Collect all visited.
-                    visited.add(current);
-                    // For each of the cards, follow the path and count gnome
-                    List<WegePlayerCard> gnomeCards = new ArrayList<>();
-                    for (WegePlayerCard card : current.getCards()) {
-                        // If there is a gnome at this intersection
-                        if (card.hasGnome()) {
-                            gnomeCards.add(card);
-                        }
-                        if (card.isPlayedBySameType()) {
-                            Intersection otherSide = findTheOtherSide(card);
-                            if (!otherSide.isVisited()) {
-                                temp.add(otherSide);
-                            }
-                        }
+        Iterator<Intersection> intersectionIterator = allIntersections.iterator();
+        Intersection boardIntersection;
+        while (!(boardIntersection = intersectionIterator.next()).isCompleted()) {
+            // Add not completed intersection to the front of temp linked list
+            WegeCard.CardType intersectionType = boardIntersection.getIntersectionType();
+            temp.add(boardIntersection);
+            List<Intersection> visitedIntersections = new ArrayList<>();
+            int gnomeGroup = 0;
+            while (!temp.isEmpty()) {
+                // remove front of linked list
+                Intersection current = temp.pop();
+                // Set to true
+                current.setVisited(true);
+                visitedIntersections.add(current);
+                // For each of the cards, follow the path and count gnomeGroup
+                for (WegeCard card : current.getCards()) {
+                    // Count up Gnome at the intersection.
+                    if (card.hasGnome() && card.getGnomePosition() == card.getPosition(current)) {
+                        gnomeGroup++;
                     }
-                }
-                // 3. Once the list is empty, look for all the intersections with visited
-                // set to true but completed set to false.
-                for (Intersection intersection1 : visited) {
-                    intersection1.setCompleted(true);
-                    if (intersection1.touchEdge()) {
-                        // COunt all the edges
+                    if (card.getCardType() == intersectionType
+                            || card.getCardType() == WegeCard.CardType.BRIDGE) {
+                        Pos intersectionPos = card.getPosition(current);
+                        // Check if the diagonal is also water
+                        Pos end = getDiagonalPos(intersectionPos);
+                        Intersection intersection = card.getIntersection(end);
+                        if (!intersection.isVisited()) temp.add(intersection);
                     }
                 }
             }
+            // 3. Once the list is empty, look for all the intersections with visitedIntersections
+            // set to true but completed set to false.
+            Set<Pos> edges = new HashSet<>();
+            for (Intersection visited : visitedIntersections) {
+                // Which edge this intersection is at ?
+                Location location = visited.getLocation();
+                if (location.row() > 0 && location.col() == 0) {
+                    edges.add(Pos.CENTER_LEFT);
+                } else if (location.row() == 0 && location.col() > 0) {
+                    edges.add(Pos.TOP_CENTER);
+                } else if (location.row() > 0 && location.col() == playingBoard[0].length - 1) {
+                    edges.add(Pos.CENTER_RIGHT);
+                } else if (location.row() == playingBoard.length - 1) {
+                    edges.add(Pos.BOTTOM_CENTER);
+                }
+                visited.setCompleted(true);
+            }
+
+            // Calculate score base on edge touch and no edge touch
+            // base on the intersection.
+
+            if (intersectionType == WegeCard.CardType.LAND) {
+                // Calculate score for land.
+                // This includes sides touch for this section,
+                // Number of pond / land
+                // and gnomeGroup count at this section.
+                System.out.printf("%s sides connected \n", edges.size());
+                System.out.printf("%s ponds created \n", "0");
+                System.out.printf("intersections of %d gnomes \n", gnomeGroup);
+                System.out.printf("Cossack played: %d \n", 0);
+            } else {
+                // Calculate score for water.
+            }
+        }
+    }
+
+    public Pos getDiagonalPos(Pos pos) {
+        return switch (pos) {
+            case TOP_LEFT -> Pos.BOTTOM_RIGHT;
+            case TOP_RIGHT -> Pos.BOTTOM_LEFT;
+            case BOTTOM_RIGHT -> Pos.TOP_LEFT;
+            case BOTTOM_LEFT -> Pos.TOP_RIGHT;
+            default -> null;
+        };
+    }
+
+    /**
+     * Monitor the turn of the player of the game Wege.
+     */
+    public class WegePlayerMonitor {
+
+        /* The queue containing order of players */
+        private Deque<WegePlayer> playersQueue;
+
+        /**
+         * Create a new monitor
+         *
+         * @param playersQueue initial queue of players.
+         */
+        public WegePlayerMonitor(Deque<WegePlayer> playersQueue) {
+            this.playersQueue = playersQueue;
         }
 
-        private Intersection findTheOtherSide(WegePlayerCard card) {
-            throw new IllegalStateException("Not yet implemented!");
+        /**
+         * Get the player queue for the next turn. This player
+         * is not removed from the queue.
+         *
+         * @return the player queue for the next turn.
+         */
+        public WegePlayer getQueuePlayer() {
+            return playersQueue.peek();
         }
+
+        /**
+         * Get the player to take this turn. The player is then removed
+         * from the top of the queue, and is queued for the next turn.
+         *
+         * @return the current player for this turn.
+         */
+        public WegePlayer getCurrentPlayer() {
+            WegePlayer currentPlayer = playersQueue.pop();
+            // Queue for next turn
+            playersQueue.add(currentPlayer);
+            return currentPlayer;
+        }
+
     }
 }

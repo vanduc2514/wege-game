@@ -3,9 +3,11 @@ package ui;
 import game.WegeCard;
 import game.WegeDeck;
 import game.WegePlayer;
-import ui.WegeNextCardButton;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
 
@@ -68,6 +70,14 @@ public class WegeBottomPane extends FlowPane {
         playerScoreLabel.setText(buildPlayerScoreText(score));
     }
 
+    private EventHandler<MouseEvent> handler;
+
+    Button endGame = new Button("End Game");
+
+    public void setEndGameEvent(EventHandler<MouseEvent> handler) {
+        endGame.setOnMouseClicked(handler);
+    }
+
     /**
      * Create the view for this pane.
      *
@@ -84,7 +94,7 @@ public class WegeBottomPane extends FlowPane {
         cardLabel.setPadding(labelPadding);
         gameInfoBox.getChildren().addAll(playerTypeLabel, playerScoreLabel, cardLabel);
         nextCardButton = createNextCardButton(statingDeck, cardLabel);
-        getChildren().addAll(nextCardButton, gameInfoBox);
+        getChildren().addAll(nextCardButton, gameInfoBox, endGame);
     }
 
     /**
@@ -109,6 +119,7 @@ public class WegeBottomPane extends FlowPane {
                 nextCardButton.setCard(nextCard);
             } else {
                 nextCardButton.rotate();
+                cardLabel.setText(buildCardInfo(nextCardButton.getCard()));
             }
         });
         WegeCard initialCard = startingDeck.drawFromFront();
@@ -146,7 +157,9 @@ public class WegeBottomPane extends FlowPane {
     private String buildCardInfo(WegeCard wegeCard) {
         StringBuilder builder = new StringBuilder();
         builder.append(wegeCard.getCardType().name())
-                .append(" card");
+                .append(" card")
+                .append("Orientation: ")
+                .append(wegeCard.getOrientation());
         if (wegeCard.hasGnome()) {
             builder.append(" with a Gnome in the corner");
         } else if (wegeCard.isPathGnome()){

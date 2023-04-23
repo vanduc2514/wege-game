@@ -74,8 +74,8 @@ public class WegePlayer {
         } else {
             // If not, ask the game master what should be the next move
             move = wegeGameMaster.nextMove(nextCard, row, col);
-        };
-        wegeGameMaster.trackPlayedCard(nextCard, this, row, col);
+        }
+        wegeGameMaster.trackPlayedCard(nextCard, row, col);
         cardPlayed.add(nextCard);
         return move;
     }

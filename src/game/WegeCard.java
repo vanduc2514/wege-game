@@ -1,6 +1,8 @@
 package game;
 
 import javafx.geometry.Pos;
+
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 /**
@@ -9,6 +11,24 @@ import java.util.NoSuchElementException;
  * @author Harold Connamacher
  */
 public class WegeCard {
+
+  private Map<Intersection, Pos> intersections;
+
+  public void setIntersections(Map<Intersection, Pos> intersections) {
+    this.intersections = intersections;
+  }
+
+  public Pos getPosition(Intersection intersection) {
+    return intersections.get(intersection);
+  }
+
+  public Intersection getIntersection(Pos position) {
+    for (var entry : intersections.entrySet()) {
+      if (entry.getValue() == position) return entry.getKey();
+    }
+    return null;
+  }
+
   /** The types of cards in the game */
   public enum CardType {WATER, LAND, BRIDGE, COSSACK};
   
