@@ -11,17 +11,12 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 
 import java.util.LinkedList;
+import java.util.Objects;
 
 /**
  * The view of a Wege game and UI interactions for the game.
  */
 public class WegeGameBox extends VBox {
-
-    /* The top playing board of this box */
-    private WegePlayingBoardPane playingBoard;
-
-    /* The bottom pane of this box */
-    private WegeBottomPane bottomPane;
 
     /* Track players of a Wege Game. */
     private final WegeGameMaster wegeGameMaster;
@@ -55,9 +50,11 @@ public class WegeGameBox extends VBox {
      * @param startingDeck the Wege deck to start the game.
      */
     private void createView(int rows, int cols, WegeDeck startingDeck) {
-        bottomPane = new WegeBottomPane(startingDeck);
+        /* The bottom pane of this box */
+        WegeBottomPane bottomPane = new WegeBottomPane(startingDeck);
         bottomPane.setEndGameEvent(event -> wegeGameMaster.endGame());
-        playingBoard = new WegePlayingBoardPane(rows, cols);
+        /* The top playing board of this box */
+        WegePlayingBoardPane playingBoard = new WegePlayingBoardPane(rows, cols);
         // UI Interactions when a player click a button on the playing board.
         playingBoard.setBoardButtonClickedHandler(getBoardButtonClickedHandler(bottomPane));
         ObservableList<Node> children = getChildren();
@@ -66,50 +63,21 @@ public class WegeGameBox extends VBox {
         bottomPane.displayPlayerScore(0);
     }
 
-    /**
-     * Get the listener when mouse click to the button on the playing board.
-     *
-     * @param bottomPane the bottom pane to set the place or swap cards.
-     * @return a listener which knows the button being clicked on the playing board
-     * and handle that event.
-     */
-    private ChangeListener<WegeBoardButton> getBoardButtonClickedListener(WegeBottomPane bottomPane) {
-        return (observable, previousButtonClicked, nextButtonClicked) -> {
-            if (bottomPane.getNextCard() == null) return;
-            WegePlayer currentPlayer = wegeGameMaster.getCurrentPlayer();
-            WegeCard nextCard = bottomPane.getNextCard();
-            try {
-                WegePlayer.Move currentMove = currentPlayer.playCard(
-                        nextCard, nextButtonClicked.getRow(), nextButtonClicked.getCol());
-                switch (currentMove) {
-                    case PLACE -> placeCard(nextButtonClicked, bottomPane);
-                    case SWAP -> swapCard(nextButtonClicked, bottomPane);
-                }
-            } catch (IllegalMoveException ignored) {
-                // TODO: Should display explanation why this player made the wrong move ?
-            }
-        };
-    }
-
-
     private EventHandler<MouseEvent> getBoardButtonClickedHandler(WegeBottomPane bottomPane) {
         return mouseClickedEvent -> {
             if (wegeGameMaster.isGameEnd()) {
                 wegeGameMaster.endGame();
+                return;
             }
             WegeBoardButton boardButton = (WegeBoardButton) mouseClickedEvent.getSource();
             if (bottomPane.getNextCard() == null) return;
-            WegePlayer currentPlayer = wegeGameMaster.getCurrentPlayer();
             WegeCard nextCard = bottomPane.getNextCard();
-            try {
-                WegePlayer.Move currentMove = currentPlayer.playCard(
-                        nextCard, boardButton.getRow(), boardButton.getCol());
-                switch (currentMove) {
-                    case PLACE -> placeCard(boardButton, bottomPane);
-                    case SWAP -> swapCard(boardButton, bottomPane);
-                }
-            } catch (IllegalMoveException ignored) {
-                // TODO: Should display explanation why this player made the wrong move ?
+            WegeGameMaster.Move currentMove = wegeGameMaster.nextMove(
+                    nextCard, boardButton.getRow(), boardButton.getCol());
+            if (Objects.requireNonNull(currentMove) == WegeGameMaster.Move.PLACE) {
+                placeCard(boardButton, bottomPane);
+            } else if (currentMove == WegeGameMaster.Move.SWAP) {
+                swapCard(boardButton, bottomPane);
             }
         };
     }
@@ -145,7 +113,6 @@ public class WegeGameBox extends VBox {
      */
     private void setCardOnBoard(WegeButton boardButton, WegeCard wegeCard) {
         boardButton.setCard(wegeCard);
-//        bottomPane.displayPlayerType(wegeGameMaster.getQueuePlayer().getPlayerType());
     }
 
 }

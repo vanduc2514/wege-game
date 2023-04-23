@@ -1,8 +1,7 @@
 package game;
 
-import javafx.geometry.Pos;
-
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Intersection {
 
@@ -13,8 +12,6 @@ public class Intersection {
     private boolean completed;
 
     private WegeCard.CardType intersectionType;
-
-    private Map<WegeCard, Pos> cardsPos;
 
     private Set<WegeCard> cards;
 
@@ -28,7 +25,6 @@ public class Intersection {
 
     public Intersection(Location location) {
         this.location = location;
-        cardsPos = new HashMap<>();
         cards = new HashSet<>();
     }
 
@@ -56,11 +52,4 @@ public class Intersection {
         return cards;
     }
 
-    public void updatePosMap(WegeCard wegeCard, Pos position) {
-        cardsPos.put(wegeCard, position);
-    }
-
-    public boolean touchEdge() {
-        throw new IllegalStateException("Not yet implemented!");
-    }
 }

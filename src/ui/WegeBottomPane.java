@@ -2,7 +2,6 @@ package ui;
 
 import game.WegeCard;
 import game.WegeDeck;
-import game.WegePlayer;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
@@ -50,15 +49,6 @@ public class WegeBottomPane extends FlowPane {
      */
     public WegeCard getNextCard() {
         return nextCardButton.getCard();
-    }
-
-    /**
-     * Display the player type.
-     *
-     * @param playerType the player type to be displayed.
-     */
-    public void displayPlayerType(WegePlayer.PlayerType playerType) {
-        playerTypeLabel.setText(buildPlayerTypeText(playerType));
     }
 
     /**
@@ -126,14 +116,6 @@ public class WegeBottomPane extends FlowPane {
         nextCardButton.setCard(initialCard);
         return nextCardButton;
     }
-
-    /**
-     * Build the text for display the player type.
-     */
-    private String buildPlayerTypeText(WegePlayer.PlayerType playerType) {
-        return "Player Type: " + playerType.name();
-    }
-
     /**
      * Build the text for display the player score.
      */

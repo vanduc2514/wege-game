@@ -18,8 +18,6 @@ public class WegeGameMaster {
 
     private LinkedList<Intersection> allIntersections = new LinkedList<>();
 
-    private WegePlayerMonitor wegePlayerMonitor;
-
     private int cardsPlayed;
 
     private final int totalCards;
@@ -42,14 +40,8 @@ public class WegeGameMaster {
                 boardIntersections[row][col] = intersection;
             }
         }
-        // TODO: Refactor.
-        WegePlayer.WegePlayerBuilder builder = new WegePlayer.WegePlayerBuilder(this);
-        WegePlayer waterPlayer = builder.buildPlayer(WegePlayer.PlayerType.WATER);
-        WegePlayer landPlayer = builder.buildPlayer(WegePlayer.PlayerType.LAND);
-        LinkedList<WegePlayer> players = new LinkedList<>();
-        players.add(waterPlayer);
-        players.add(landPlayer);
-        wegePlayerMonitor = new WegePlayerMonitor(players);
+        // TODO Fix a bug that scoring does not run all
+        allIntersections.add(allIntersections.get(0));
     }
 
     public boolean isGameEnd() {
@@ -104,18 +96,19 @@ public class WegeGameMaster {
         );
     }
 
-    public WegePlayer.Move nextMove(WegeCard nextCard, int row, int col) throws IllegalMoveException {
+    // Check card played or not
+    public Move nextMove(WegeCard nextCard, int row, int col) {
         WegeCard wegeCard = findWegeCard(row, col);
         // If there is no card, it's a placement
         // otherwise, it's a swap
         if (wegeCard == null && isLegalRegularCardMove(nextCard, row, col)) {
-            return WegePlayer.Move.PLACE;
+            return Move.PLACE;
         } else if (wegeCard != null
                 && wegeCard.getCardType() == WegeCard.CardType.BRIDGE
                 && isLegalBridgeCardMove(nextCard, row, col)) {
-            return WegePlayer.Move.SWAP;
+            return Move.SWAP;
         }
-        throw new IllegalMoveException();
+        return null;
     }
 
     /**
@@ -159,8 +152,8 @@ public class WegeGameMaster {
             adjacentCardContactPos = Pos.TOP_LEFT;
             nextCardContactPos = Pos.TOP_RIGHT;
         } else if ((adjacentCard = findTopCard(row, col)) != null) {
-            adjacentCardContactPos = Pos.TOP_LEFT;
-            nextCardContactPos = Pos.BOTTOM_LEFT;
+            adjacentCardContactPos = Pos.BOTTOM_LEFT;
+            nextCardContactPos = Pos.TOP_LEFT;
         } else {
             return false;
         }
@@ -248,6 +241,7 @@ public class WegeGameMaster {
                 WegeCard leftCard = findLeftCard(row, col);
                 if (isInGnomeGroup(leftCard, Pos.BOTTOM_RIGHT)) groupMembers.add(leftCard);
             }
+            default -> {}
         }
         // all null needs to be removed to avoid NullPointerException.
         groupMembers.removeAll(Collections.singletonList(null));
@@ -327,14 +321,6 @@ public class WegeGameMaster {
         }
     }
 
-    public WegePlayer getCurrentPlayer() {
-        return wegePlayerMonitor.getCurrentPlayer();
-    }
-
-    public WegePlayer getQueuePlayer() {
-        return wegePlayerMonitor.getQueuePlayer();
-    }
-
     public void endGame() {
         LinkedList<Intersection> temp = new LinkedList<>();
         Iterator<Intersection> intersectionIterator = allIntersections.iterator();
@@ -393,6 +379,7 @@ public class WegeGameMaster {
                 // This includes sides touch for this section,
                 // Number of pond / land
                 // and gnomeGroup count at this section.
+                System.out.println("------------------------");
                 System.out.printf("%s sides connected \n", edges.size());
                 System.out.printf("%s ponds created \n", "0");
                 System.out.printf("intersections of %d gnomes \n", gnomeGroup);
@@ -413,45 +400,12 @@ public class WegeGameMaster {
         };
     }
 
-    /**
-     * Monitor the turn of the player of the game Wege.
-     */
-    public class WegePlayerMonitor {
-
-        /* The queue containing order of players */
-        private Deque<WegePlayer> playersQueue;
-
-        /**
-         * Create a new monitor
-         *
-         * @param playersQueue initial queue of players.
-         */
-        public WegePlayerMonitor(Deque<WegePlayer> playersQueue) {
-            this.playersQueue = playersQueue;
-        }
-
-        /**
-         * Get the player queue for the next turn. This player
-         * is not removed from the queue.
-         *
-         * @return the player queue for the next turn.
-         */
-        public WegePlayer getQueuePlayer() {
-            return playersQueue.peek();
-        }
-
-        /**
-         * Get the player to take this turn. The player is then removed
-         * from the top of the queue, and is queued for the next turn.
-         *
-         * @return the current player for this turn.
-         */
-        public WegePlayer getCurrentPlayer() {
-            WegePlayer currentPlayer = playersQueue.pop();
-            // Queue for next turn
-            playersQueue.add(currentPlayer);
-            return currentPlayer;
-        }
-
+    public enum Move {
+        PLACE, SWAP
     }
+
+    public enum WegeType {
+        LAND, WATER
+    }
+
 }
