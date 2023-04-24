@@ -2,9 +2,9 @@ package game;
 
 public class Player {
 
-    private boolean played;
+    private int cossackCardsPlayed;
 
-    private boolean isLand;
+    private final boolean isLand;
 
     public Player(boolean isLand) {
         this.isLand = isLand;
@@ -14,12 +14,11 @@ public class Player {
         return isLand;
     }
 
-    public boolean isPlayed() {
-        boolean status = this.played;
-        if (!this.played) {
-            this.played = true;
-        }
-        return status;
+    public int getCossackCardsPlayed() {
+        return cossackCardsPlayed;
     }
 
+    public void increaseCossackCardPlayed() {
+        cossackCardsPlayed++;
+    }
 }

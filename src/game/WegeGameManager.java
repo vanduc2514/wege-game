@@ -1,25 +1,21 @@
 package game;
 
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 
 public class WegeGameManager {
 
-    Player landPlayer = new Player(true);
+    private final Player landPlayer = new Player(true);
 
-    Player waterPlayer = new Player(false);
-
-    Queue<Player> playerQueue = new LinkedList<>();
-
-    private boolean gameStarted;
+    private final Player waterPlayer = new Player(false);
 
     private final WegePlayingBoard playingBoard;
 
+    private Player nextPlayer;
+
+    private boolean gameStarted;
+
     public WegeGameManager(WegePlayingBoard playingBoard) {
         this.playingBoard = playingBoard;
-        playerQueue.add(landPlayer);
-        playerQueue.add(waterPlayer);
     }
 
     // Get all the intersection and check the position of it
@@ -31,6 +27,10 @@ public class WegeGameManager {
             legalPlace = isLegalPlace(card);
         }
         if (legalPlace) {
+            if (card.getCardType() == WegeCard.CardType.COSSACK) {
+                nextPlayer.increaseCossackCardPlayed();
+            }
+            setNextPlayer();
             playingBoard.placeCardOnBoard(card);
         }
         return legalPlace;
@@ -39,17 +39,10 @@ public class WegeGameManager {
     public boolean trySwapCard(WegePlayingCard card) {
         boolean legalSwap = isLegalSwap(card) && isLegalPlace(card);
         if (legalSwap) {
+            setNextPlayer();
             playingBoard.placeCardOnBoard(card);
         }
         return legalSwap;
-    }
-
-    private boolean isGameStarted() {
-        try {
-            return gameStarted;
-        } finally {
-            gameStarted = true;
-        }
     }
 
     private boolean isLegalPlace(WegePlayingCard card) {
@@ -81,5 +74,23 @@ public class WegeGameManager {
         }
         return true;
     }
+
+    private boolean isGameStarted() {
+        try {
+            return gameStarted;
+        } finally {
+            gameStarted = true;
+        }
+    }
+
+    private void setNextPlayer() {
+        if (nextPlayer != landPlayer) {
+            nextPlayer = landPlayer;
+        } else {
+            nextPlayer = waterPlayer;
+        }
+    }
+
+    ////////////////////////// Player Score evaluation
 
 }
