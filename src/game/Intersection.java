@@ -9,37 +9,15 @@ public class Intersection {
 
     private final int y;
 
-    private final Location location;
-
     private boolean visited;
 
     private boolean completed;
 
     private int facingGnomeCount;
 
-    private WegePlayingCard.CardType intersectionType;
-
-    private Set<WegePlayingCard> cards;
-
     private boolean isLand;
 
-    public void setIntersectionType(WegePlayingCard.CardType intersectionType) {
-        this.intersectionType = intersectionType;
-    }
-
-    public WegePlayingCard.CardType getIntersectionType() {
-        return intersectionType;
-    }
-
-    public Intersection(Location location) {
-        this.location = location;
-        this.x = 0;
-        this.y = 0;
-        cards = new HashSet<>();
-    }
-
     public Intersection(int x, int y) {
-        this.location = null;
         this.x = x;
         this.y = y;
     }
@@ -56,10 +34,6 @@ public class Intersection {
         return !isLand;
     }
 
-    public Location getLocation() {
-        return location;
-    }
-
     public void setVisited(boolean visited) {
         this.visited = visited;
     }
@@ -74,10 +48,6 @@ public class Intersection {
 
     public void setCompleted(boolean completed) {
         this.completed = completed;
-    }
-
-    public Set<WegePlayingCard> getCards() {
-        return cards;
     }
 
     public int getX() {

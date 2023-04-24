@@ -2,6 +2,7 @@ package game;
 
 import javafx.geometry.Pos;
 
+// TODO: ultimate refactor to remove this sub-class
 public class WegePlayingCard extends WegeCard {
 
     private int row;
@@ -47,6 +48,16 @@ public class WegePlayingCard extends WegeCard {
     public boolean isGnome(Intersection intersection) {
         Pos relativePosition = findRelativePosition(intersection);
         return hasGnome() && getGnomePosition() == relativePosition;
+    }
+
+    public Pos findOppositePosition(Intersection intersection) {
+        return switch (findRelativePosition(intersection)) {
+            case TOP_LEFT -> Pos.BOTTOM_RIGHT;
+            case TOP_RIGHT -> Pos.BOTTOM_LEFT;
+            case BOTTOM_RIGHT -> Pos.TOP_LEFT;
+            case BOTTOM_LEFT -> Pos.TOP_RIGHT;
+            default -> throw new IllegalArgumentException("Intersection is not on this card!");
+        };
     }
 
     /**

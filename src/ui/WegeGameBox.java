@@ -7,6 +7,8 @@ import javafx.scene.Node;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 
+import java.util.List;
+
 /**
  * The view of a Wege game and UI interactions for the game.
  */
@@ -50,7 +52,9 @@ public class WegeGameBox extends VBox {
     private void createView(int rows, int cols, WegeDeck startingDeck) {
         /* The bottom pane of this box */
         WegeBottomPane bottomPane = new WegeBottomPane(startingDeck);
-//        bottomPane.setEndGameEvent(event -> wegeGameMaster.endGame());
+        bottomPane.setEndGameEvent(event -> {
+            wegeGameManager.collectPlayerStatistic().forEach(System.out::println);
+        });
         /* The top playing board of this box */
         WegePlayingBoardPane playingBoard = new WegePlayingBoardPane(rows, cols);
         // UI Interactions when a player click a button on the playing board.
@@ -63,10 +67,11 @@ public class WegeGameBox extends VBox {
 
     private EventHandler<MouseEvent> getBoardButtonClickedHandler(WegeBottomPane bottomPane) {
         return mouseClickedEvent -> {
-//            if (wegeGameMaster.isGameEnd()) {
-//                wegeGameMaster.endGame();
-//                return;
-//            }
+            if (wegeGameManager.isGameEnded()) {
+                wegeGameManager.collectPlayerStatistic()
+                        .forEach(System.out::println);
+                return;
+            }
             if (bottomPane.getNextCard() == null) return;
             WegeBoardButton boardButton = (WegeBoardButton) mouseClickedEvent.getSource();
             WegePlayingCard nextCard = bottomPane.getNextCard();
