@@ -14,7 +14,7 @@ public class WegePlayingBoard {
     private final int maximumCards;
 
     /* 2 dimension array that represent the current cards played on the game board. */
-    private final WegeCard[][] cardsOnBoard;
+    private final WegePlayingCard[][] cardsOnBoard;
 
     /* 2 dimension array that represent intersections where cards connect on the game board. */
     private final Intersection[][] intersectionGrid;
@@ -30,8 +30,8 @@ public class WegePlayingBoard {
      */
     public WegePlayingBoard(int rows, int cols) {
         this.maximumCards = rows * cols;
-        this.cardsOnBoard = new WegeCard[rows][cols];
-        this.intersectionGrid = createIntersectionGrid(this.cardsOnBoard);
+        this.cardsOnBoard = new WegePlayingCard[rows][cols];
+        this.intersectionGrid = new Intersection[rows + 1][cols + 1];
     }
 
     /**
@@ -39,28 +39,19 @@ public class WegePlayingBoard {
      * the internal state of the board.
      * 
      * @param card the Wege card to be placed.
-     * @param row the row to be placed on the board.
-     * @param col the column to be placed on the board.
      */
-    public void placeCardOnBoard(WegeCard card, int row, int col) {
+    public void placeCardOnBoard(WegePlayingCard card) {
+        int row = card.getRow();
+        int col = card.getCol();
         cardsOnBoard[row][col] = card;
-        card.setRow(row);
-        card.setCol(col);
+        List<Intersection> surroundIntersections = getSurroundIntersections(row, col);
+        for (Intersection intersection : surroundIntersections) {
+            intersection.setLand(card.isLand(intersection));
+            if (card.isGnome(intersection)) {
+                intersection.increaseFacingGnomeCount();
+            }
+        }
         cardsPlayed++;
-    }
-
-    /**
-     * Swap a card on the game board at the given location. This update
-     * the internal state of the board.
-     *
-     * @param card the Wege card to swap with another card on the board.
-     * @param row the row to be swapped on the board.
-     * @param col the column to be swapped on the board.
-     */
-    public void swapCardOnBoard(WegeCard card, int row, int col) {
-        cardsOnBoard[row][col] = card;
-        card.setRow(row);
-        card.setCol(col);
     }
 
     /**
@@ -71,8 +62,8 @@ public class WegePlayingBoard {
      * @return a card on the playing board or <code>null</code>
      * if there is no card at the given location.
      */
-    public WegeCard findTopCard(int row, int col) {
-        return findWegeCard(row - 1, col);
+    public WegePlayingCard findTopCard(int row, int col) {
+        return findPlayedCard(row - 1, col);
     }
 
     /**
@@ -83,8 +74,8 @@ public class WegePlayingBoard {
      * @return a card on the playing board or <code>null</code>
      * if there is no card at the given location.
      */
-    public WegeCard findRightCard(int row, int col) {
-        return findWegeCard(row, col + 1);
+    public WegePlayingCard findRightCard(int row, int col) {
+        return findPlayedCard(row, col + 1);
     }
 
     /**
@@ -95,8 +86,8 @@ public class WegePlayingBoard {
      * @return a card on the playing board or <code>null</code>
      * if there is no card at the given location.
      */
-    public WegeCard findBottomCard(int row, int col) {
-        return findWegeCard(row + 1, col);
+    public WegePlayingCard findBottomCard(int row, int col) {
+        return findPlayedCard(row + 1, col);
     }
 
     /**
@@ -107,8 +98,8 @@ public class WegePlayingBoard {
      * @return a card on the playing board or <code>null</code>
      * if there is no card at the given location.
      */
-    public WegeCard findLeftCard(int row, int col) {
-        return findWegeCard(row, col - 1);
+    public WegePlayingCard findLeftCard(int row, int col) {
+        return findPlayedCard(row, col - 1);
     }
 
     /**
@@ -119,7 +110,7 @@ public class WegePlayingBoard {
      * @return a card on the playing board or <code>null</code>
      * if there is no card at the given location.
      */
-    public WegeCard findWegeCard(int row, int col) {
+    public WegePlayingCard findPlayedCard(int row, int col) {
         try {
             return cardsOnBoard[row][col];
         } catch (IndexOutOfBoundsException ignored) {
@@ -138,21 +129,21 @@ public class WegePlayingBoard {
     }
 
     //TODO: Heavy refactor
-    public List<PlayerStatistic> collectPlayerStatistics() {
+    public List<Player> collectPlayerStatistics() {
         if (!isFilledUp()) {
             throw new IllegalStateException("Playing board is not filled up with all of the cards");
         }
-        PlayerStatistic landStatistic = new PlayerStatistic(true);
-        PlayerStatistic waterStatistic = new PlayerStatistic(false);
+        Player landStatistic = new Player(true);
+        Player waterStatistic = new Player(false);
         LinkedList<Intersection> visitQueue = new LinkedList<>();
         Iterator<Intersection> intersectionIterator = createIntersectionGridIterator(intersectionGrid);
-        Function<Intersection, PlayerStatistic> selectStatisticFunc = createStatisticFunction(landStatistic, waterStatistic);
-        Function<PlayerStatistic, PlayerStatistic> getOtherStatisticFunc = createOtherStatisticFunction(landStatistic, waterStatistic);
+        Function<Intersection, Player> selectStatisticFunc = createStatisticFunction(landStatistic, waterStatistic);
+        Function<Player, Player> getOtherStatisticFunc = createOtherStatisticFunction(landStatistic, waterStatistic);
         
         //////////////////////////////////////////////// Start travelling.
         Intersection nextIntersection;
         while (!(nextIntersection = intersectionIterator.next()).isCompleted()) {
-            PlayerStatistic currentStatistic = selectStatisticFunc.apply(nextIntersection);
+            Player currentStatistic = selectStatisticFunc.apply(nextIntersection);
             visitQueue.addFirst(nextIntersection);
             List<Intersection> visitedIntersections = new ArrayList<>();
             int gnomeGroup = 0;
@@ -163,13 +154,13 @@ public class WegePlayingBoard {
                 current.setVisited(true);
                 visitedIntersections.add(current);
                 // For each of the cards, follow the path and count gnomeGroup
-                for (WegeCard card : findCardsAtIntersection(current.getX(), current.getY())) {
+                for (WegePlayingCard card : findCardsAtIntersection(current.getX(), current.getY())) {
                     Pos startPos = findPosOnCard(card, current);
                     // Count up Gnome at the intersection.
                     if (card.hasGnome() && card.getGnomePosition() == startPos) {
                         gnomeGroup++;
                     }
-                    if (sameKind(card, currentStatistic) || card.getCardType() == WegeCard.CardType.BRIDGE) {
+                    if (sameKind(card, currentStatistic) || card.getCardType() == WegePlayingCard.CardType.BRIDGE) {
                         Pos endPos = getDiagonalOppositePosition(startPos);
                         Intersection intersection = findIntersectionOnCard(card, endPos);
                         if (!intersection.isVisited()) visitQueue.addFirst(intersection);
@@ -193,7 +184,7 @@ public class WegePlayingBoard {
         return null;
     }
 
-    private Intersection findIntersectionOnCard(WegeCard card, Pos endPos) {
+    private Intersection findIntersectionOnCard(WegePlayingCard card, Pos endPos) {
         return null;
     }
 
@@ -227,9 +218,9 @@ public class WegePlayingBoard {
      * @return a function if apply to the statistic of the land player, return the statistic
      * of the water player and vice-versa.
      */
-    private Function<PlayerStatistic, PlayerStatistic> createOtherStatisticFunction(
-            PlayerStatistic landStatistic,
-            PlayerStatistic waterStatistic) {
+    private Function<Player, Player> createOtherStatisticFunction(
+            Player landStatistic,
+            Player waterStatistic) {
         return statistic -> {
             if (statistic == landStatistic) return waterStatistic;
             return landStatistic;
@@ -246,11 +237,11 @@ public class WegePlayingBoard {
      * @return a function which can apply to an intersection and determine which 
      * is the statistic needed.
      */
-    private Function<Intersection, PlayerStatistic> createStatisticFunction(
-            PlayerStatistic landStatistic,
-            PlayerStatistic waterStatistic) {
+    private Function<Intersection, Player> createStatisticFunction(
+            Player landStatistic,
+            Player waterStatistic) {
         return intersection -> {
-            WegeCard topLeftCard = findTopLeftCard(intersection.getX(), intersection.getY());
+            WegePlayingCard topLeftCard = findTopLeftCard(intersection.getX(), intersection.getY());
             Pos locationOnCard = findPosOnCard(topLeftCard, intersection);
             if (topLeftCard.isLand(locationOnCard)) return landStatistic;
             else return waterStatistic;
@@ -264,9 +255,9 @@ public class WegePlayingBoard {
      * @param y the y coordinate of this intersection on the grid.
      * @return all cards that made up this intersection.
      */
-    private Set<WegeCard> findCardsAtIntersection(int x, int y) {
+    private Set<WegePlayingCard> findCardsAtIntersection(int x, int y) {
         // Since the corner and edge intersections can have duplicate cards.
-        Set<WegeCard> cards = new HashSet<>();
+        Set<WegePlayingCard> cards = new HashSet<>();
         // top left
         cards.add(findTopLeftCard(x, y));
         // top right
@@ -278,7 +269,7 @@ public class WegePlayingBoard {
         return cards;
     }
 
-    private WegeCard findTopLeftCard(int x, int y) {
+    private WegePlayingCard findTopLeftCard(int x, int y) {
         return cardsOnBoard[getCoordinateInBoard(x - 1)][getCoordinateInBoard(y - 1)];
     }
 
@@ -300,7 +291,7 @@ public class WegePlayingBoard {
      * @param intersection the intersection.
      * @return the relative position or null if the intersection is not belong to a card.
      */
-    static Pos findPosOnCard(WegeCard card, Intersection intersection) {
+    static Pos findPosOnCard(WegePlayingCard card, Intersection intersection) {
         return findPosOnCard(
                 card.getRow(), 
                 card.getCol(),
@@ -335,11 +326,11 @@ public class WegePlayingBoard {
      * if the card is a water card and the statistic for the water player. Otherwise, return
      * <code>false</code>
      */
-    static boolean sameKind(WegeCard card, PlayerStatistic currentStatistic) {
-        if (currentStatistic.isLandPlayer()
-                && card.getCardType() == WegeCard.CardType.LAND) return true;
-        return !currentStatistic.isLandPlayer()
-                && card.getCardType() == WegeCard.CardType.WATER;
+    static boolean sameKind(WegePlayingCard card, Player currentStatistic) {
+        if (currentStatistic.isLand()
+                && card.getCardType() == WegePlayingCard.CardType.LAND) return true;
+        return !currentStatistic.isLand()
+                && card.getCardType() == WegePlayingCard.CardType.WATER;
     }
 
     /**
@@ -366,7 +357,7 @@ public class WegePlayingBoard {
      * of the cards connect. This includes the board corners as "intersections" even though there
      * is only one card there at that corner.
      */
-    static Intersection[][] createIntersectionGrid(WegeCard[][] cardsOnBoard) {
+    static Intersection[][] createIntersectionGrid(WegePlayingCard[][] cardsOnBoard) {
         Intersection[][] grid = new Intersection[cardsOnBoard.length + 1][cardsOnBoard[0].length + 1];
         for (int x = 0; x < grid.length; x++) {
             for (int y = 0; y < grid[x].length; y++) {
@@ -427,5 +418,52 @@ public class WegePlayingBoard {
             }
         };
     }
-    
+
+    /**
+     * Find {@link Pos#TOP_LEFT}, {@link Pos#TOP_RIGHT},
+     * {@link Pos#BOTTOM_LEFT}, {@link Pos#BOTTOM_RIGHT}
+     * intersections that presented on the intersection grid from
+     * a location on the playing board.
+     *
+     * @param row the row of the card on the playing board.
+     * @param col the column of the card on the playing board.
+     * @return intersections surrounding that location or an empty list
+     * if the intersections have not been played.
+     */
+    public List<Intersection> findSurroundIntersections(int row, int col) {
+        List<Intersection> intersections = new ArrayList<>();
+        intersections.add(intersectionGrid[row][col]);
+        intersections.add(intersectionGrid[row][col + 1]);
+        intersections.add(intersectionGrid[row + 1][col]);
+        intersections.add(intersectionGrid[row + 1][col + 1]);
+        intersections.removeIf(Objects::isNull);
+        return intersections;
+    }
+
+    public List<Intersection> getSurroundIntersections(int row, int col) {
+        List<Intersection> intersections = new ArrayList<>();
+        for (int x = row; x <= row + 1; x++) {
+            for (int y = col; y <= col + 1; y++) {
+                Intersection intersection = intersectionGrid[x][y];
+                if (intersection == null) {
+                    intersection = new Intersection(x, y);
+                    intersectionGrid[x][y] = intersection;
+                }
+                intersections.add(intersection);
+            }
+        }
+        return intersections;
+    }
+
+    public Intersection findFirstContactPoint(int row, int col) {
+        for (int x = row; x <= row + 1; x++) {
+            for (int y = col; y <= col + 1; y++) {
+                Intersection intersection = intersectionGrid[x][y];
+                if (intersection != null) {
+                    return intersection;
+                }
+            }
+        }
+        return null;
+    }
 }

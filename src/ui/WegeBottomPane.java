@@ -1,6 +1,7 @@
 package ui;
 
 import game.WegeCard;
+import game.WegePlayingCard;
 import game.WegeDeck;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -38,7 +39,7 @@ public class WegeBottomPane extends FlowPane {
      *
      * @param wegeCard the card to set.
      */
-    public void setNextCard(WegeCard wegeCard) {
+    public void setNextCard(WegePlayingCard wegeCard) {
         nextCardButton.setCard(wegeCard);
     }
 
@@ -47,8 +48,8 @@ public class WegeBottomPane extends FlowPane {
      *
      * @return the next card from the next button.
      */
-    public WegeCard getNextCard() {
-        return nextCardButton.getCard();
+    public WegePlayingCard getNextCard() {
+        return (WegePlayingCard) nextCardButton.getCard();
     }
 
     /**
@@ -105,14 +106,14 @@ public class WegeBottomPane extends FlowPane {
         });
         nextCardButton.addMouseClickedListener(mouseClickedEvent -> {
             if (nextCardButton.getCard() == null) {
-                WegeCard nextCard = startingDeck.drawFromFront();
+                WegePlayingCard nextCard = startingDeck.drawFromFront();
                 nextCardButton.setCard(nextCard);
             } else {
                 nextCardButton.rotate();
                 cardLabel.setText(buildCardInfo(nextCardButton.getCard()));
             }
         });
-        WegeCard initialCard = startingDeck.drawFromFront();
+        WegePlayingCard initialCard = startingDeck.drawFromFront();
         nextCardButton.setCard(initialCard);
         return nextCardButton;
     }
@@ -120,7 +121,7 @@ public class WegeBottomPane extends FlowPane {
      * Build the text for display the player score.
      */
     private String buildPlayerScoreText(int score) {
-        return "Player Score: " + String.valueOf(score);
+        return "Player Score: " + score;
     }
 
     /**
