@@ -26,11 +26,11 @@ class WegeGameSettingTest {
     @Test
     @DisplayName("Test create special game")
     void shouldCreateSpecialGame() {
-        int fakeEachCardAmmount = 5;
-        WegeGameSetting actual = WegeGameSetting.createSpecialGame(fakeEachCardAmmount);
+        int fakeEachCardAmount = 5;
+        WegeGameSetting actual = WegeGameSetting.createSpecialGame(fakeEachCardAmount);
         assertEquals(6, actual.rows());
         assertEquals(6, actual.cols());
-        assertEquals(fakeEachCardAmmount * SPECIAL_CARDS_AMOUNT, actual.deck().size());
+        assertEquals(fakeEachCardAmount * SPECIAL_CARDS_AMOUNT, actual.deck().size());
     }
 
     @Test

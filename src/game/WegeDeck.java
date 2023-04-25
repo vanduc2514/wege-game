@@ -1,8 +1,6 @@
 package game;
 
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.*;
 import java.util.function.Supplier;
 
 /**
@@ -13,7 +11,7 @@ public class WegeDeck {
     public static final int STANDARD_BOARD_TILES = 36;
 
     /* The position of Gnome in a card. */
-    private enum GnomePos {PATH, CORNER}
+    enum GnomePos {PATH, CORNER}
 
     /* Holder to store all playing cards of this desk. */
     private final LinkedList<WegePlayingCard> cards;
@@ -21,8 +19,18 @@ public class WegeDeck {
     /**
      * Create a new deck with no playing cards.
      */
-    public WegeDeck() {
+    private WegeDeck() {
         this.cards = new LinkedList<>();
+    }
+
+    /**
+     * Prefilled the card with the given list of cards.
+     * Constructor used for Unit Test.
+     *
+     * @param playingCards the cards to be added to the Wege Deck.
+     */
+    WegeDeck(LinkedList<WegePlayingCard> playingCards) {
+        this.cards = playingCards;
     }
 
     /**
@@ -45,7 +53,7 @@ public class WegeDeck {
      * @param cards the amount of cards adds to the deck.
      * @param cardSupplier a {@link Supplier} to supply a type of wege card.
      */
-    private void addCardsToDeck(
+    void addCardsToDeck(
             int cards,
             Supplier<WegePlayingCard> cardSupplier) {
         for (int i = 0; i < cards; i++) {
@@ -56,8 +64,18 @@ public class WegeDeck {
     /**
      * Shuffle the deck.
      */
-    private void shuffle() {
+    void shuffle() {
         Collections.shuffle(cards);
+    }
+
+    /**
+     * Return all the cards available in the deck. Used for unit test.
+     *
+     * @return a copy list of all cards in this deck to avoid
+     * mutation.
+     */
+    List<WegePlayingCard> getAllCards() {
+        return List.copyOf(cards);
     }
 
     /**
@@ -95,7 +113,7 @@ public class WegeDeck {
         playingDeck.addCardsToDeck(numberOfEachCard, cardSupplier(WegeCard.CardType.LAND, GnomePos.PATH));
         playingDeck.addCardsToDeck(numberOfEachCard, cardSupplier(WegeCard.CardType.LAND, GnomePos.CORNER));
         playingDeck.addCardsToDeck(numberOfEachCard, cardSupplier(WegeCard.CardType.WATER, GnomePos.PATH));
-        playingDeck.addCardsToDeck(numberOfEachCard, cardSupplier(WegeCard.CardType.LAND, GnomePos.CORNER));
+        playingDeck.addCardsToDeck(numberOfEachCard, cardSupplier(WegeCard.CardType.WATER, GnomePos.CORNER));
         playingDeck.addCardsToDeck(numberOfEachCard, cardSupplier(WegeCard.CardType.COSSACK, null));
         playingDeck.addCardsToDeck(numberOfEachCard, cardSupplier(WegeCard.CardType.BRIDGE, null));
         playingDeck.shuffle();
@@ -150,7 +168,7 @@ public class WegeDeck {
         wegeDeck.addCardsToDeck(3, cardSupplier(WegeCard.CardType.LAND, GnomePos.PATH));
         wegeDeck.addCardsToDeck(2, cardSupplier(WegeCard.CardType.LAND, GnomePos.CORNER));
         wegeDeck.addCardsToDeck(3, cardSupplier(WegeCard.CardType.WATER, GnomePos.PATH));
-        wegeDeck.addCardsToDeck(2, cardSupplier(WegeCard.CardType.LAND, GnomePos.CORNER));
+        wegeDeck.addCardsToDeck(2, cardSupplier(WegeCard.CardType.WATER, GnomePos.CORNER));
         wegeDeck.addCardsToDeck(12, cardSupplier(WegeCard.CardType.WATER, null));
         wegeDeck.addCardsToDeck(12, cardSupplier(WegeCard.CardType.LAND, null));
         wegeDeck.addCardsToDeck(3, cardSupplier(WegeCard.CardType.COSSACK, null));
