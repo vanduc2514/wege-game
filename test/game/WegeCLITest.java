@@ -21,7 +21,7 @@ class WegeCLITest {
     @Test
     @DisplayName("Test validate argument with positive single digit numbers")
     void shouldValidate_withPositiveSingleDigitNumbers() {
-        List<String> fakePositiveSingleDigitNumbers = List.of("1", "1", "9");
+        List<String> fakePositiveSingleDigitNumbers = List.of("3", "3", "9");
         boolean actual = WegeCLI.validateApplicationArguments(fakePositiveSingleDigitNumbers);
         assertTrue(actual);
     }

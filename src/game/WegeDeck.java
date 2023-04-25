@@ -11,7 +11,7 @@ public class WegeDeck {
     public static final int STANDARD_BOARD_TILES = 36;
 
     /* The position of Gnome in a card. */
-    enum GnomePos {PATH, CORNER}
+    public enum GnomePos {PATH, CORNER}
 
     /* Holder to store all playing cards of this desk. */
     private final LinkedList<WegePlayingCard> cards;
@@ -193,11 +193,11 @@ public class WegeDeck {
                 break;
             }
             WegePlayingCard cardInDeck = deckIterator.next();
-            if (cardInDeck.hasGnome()) {
-                if (cardInDeck.getCardType() == WegeCard.CardType.LAND) {
+            if (!cardInDeck.hasGnome()) {
+                if (landCardsRemoved != numberOfCards && cardInDeck.getCardType() == WegeCard.CardType.LAND) {
                     landCardsRemoved++;
                     deckIterator.remove();
-                } else if (cardInDeck.getCardType() == WegeCard.CardType.WATER) {
+                } else if (waterCardsRemoved != numberOfCards && cardInDeck.getCardType() == WegeCard.CardType.WATER) {
                     waterCardsRemoved++;
                     deckIterator.remove();
                 }

@@ -1,4 +1,8 @@
-package game;
+package helper;
+
+import game.WegeCard;
+import game.WegeDeck;
+import game.WegePlayingCard;
 
 import java.util.List;
 import java.util.function.Function;
@@ -46,6 +50,28 @@ public class TestUtil {
                 }
             }
             return accumulator;
+        };
+    }
+
+    /**
+     * Match a wege card based on the given characteristic.
+     *
+     * @param card the card to match.
+     * @param cardType the type of the card.
+     * @param gnomePos the position of Gnome on the card, or
+     *                 <code>null</code> if there is no Gnome on card.
+     * @return true if the given card match with the given characteristic.
+     */
+    public static boolean matchWegeCard(
+            WegePlayingCard card,
+            WegeCard.CardType cardType,
+            WegeDeck.GnomePos gnomePos) {
+        WegeCard.CardType thisType = card.getCardType();
+        if (thisType != cardType) return false;
+        if (gnomePos == null) return !card.hasGnome();
+        return switch (gnomePos) {
+            case PATH -> card.isPathGnome();
+            case CORNER -> card.hasGnome() && !card.isPathGnome();
         };
     }
 

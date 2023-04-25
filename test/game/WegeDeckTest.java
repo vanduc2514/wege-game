@@ -10,8 +10,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.util.LinkedList;
 import java.util.List;
 
-import static game.TestUtil.countCardWithType;
-import static game.TestUtil.createWegeCard;
+import static helper.TestUtil.countCardWithType;
+import static helper.TestUtil.createWegeCard;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
@@ -58,7 +58,7 @@ class WegeDeckTest {
         assertSame(stubPlayingCards.get(0), wegeDeck.drawFromFront());
     }
 
-    @ParameterizedTest(name = "Add {arguments} to the deck")
+    @ParameterizedTest(name = "Add {0} {1} card to the deck")
     @MethodSource("provideInputForAddCardTest")
     @DisplayName("Test add card to the Wege Deck")
     void shouldAddCardToTheDeck(int numberOfCardToAdd, WegeCard.CardType typeOfCardToAdd) {

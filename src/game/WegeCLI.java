@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 public class WegeCLI {
 
     /* Only accept maximum two-digit positive number start from 1. */
-    private static final Pattern VALID_POSITIVE_INTEGER_REGEX = Pattern.compile("^[1-9]$");
+    private static final Pattern VALID_POSITIVE_INTEGER_REGEX = Pattern.compile("^[3-9]$");
 
     private WegeCLI() {}
 
