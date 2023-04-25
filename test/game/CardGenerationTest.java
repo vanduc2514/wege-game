@@ -41,6 +41,7 @@ class CardGenerationTest {
 
     @ParameterizedTest(name = "{0}, amount: " + SPECIAL_DECK_SIZE)
     @MethodSource("provideInputsForSpecialDeckTest")
+    @DisplayName("Test generate special deck")
     void shouldGenerateSpecialDeck(Predicate<WegePlayingCard> condition) {
         // When
         List<WegePlayingCard> actualCardsInDeck = specialDeck.getAllCards();
