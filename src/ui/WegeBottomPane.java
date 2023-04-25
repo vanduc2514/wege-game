@@ -1,15 +1,17 @@
 package ui;
 
 import game.WegeCard;
-import game.WegePlayingCard;
 import game.WegeDeck;
+import game.WegePlayingCard;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
-import javafx.scene.control.Button;
+import javafx.geometry.Orientation;
 import javafx.scene.control.Label;
+import javafx.scene.control.Separator;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
 
 /**
  * The pane to display at the bottom, contains next card button and other label.
@@ -46,14 +48,6 @@ public class WegeBottomPane extends FlowPane {
         return (WegePlayingCard) nextCardButton.getCard();
     }
 
-    private EventHandler<MouseEvent> handler;
-
-    Button endGame = new Button("End Game");
-
-    public void setEndGameEvent(EventHandler<MouseEvent> handler) {
-        endGame.setOnMouseClicked(handler);
-    }
-
     /**
      * Create the view for this pane.
      *
@@ -62,11 +56,24 @@ public class WegeBottomPane extends FlowPane {
     private void createView(WegeDeck statingDeck) {
         VBox gameInfoBox = new VBox();
         Insets labelPadding = new Insets(0, 0, 10, 0);
+        Font font = Font.font("Arial", 14);
         Label cardLabel = new Label();
+        cardLabel.setFont(font);
         cardLabel.setPadding(labelPadding);
-        gameInfoBox.getChildren().addAll(cardLabel);
+        Label descriptionLabel = new Label(
+                "Wege, or Landlock, is a game for two players. " +
+                        "If you are \"Land\", your goal is to have a connected land path " +
+                        "touch as many sides of the park as possible. " +
+                        "If you are \"Water\", your goal is to create a connected stream of " +
+                        "water that connects as many sides of the park as possible"
+        );
+        descriptionLabel.setPrefWidth(500);
+        descriptionLabel.setWrapText(true);
+        descriptionLabel.setFont(font);
+        gameInfoBox.getChildren().addAll(cardLabel, descriptionLabel);
         nextCardButton = createNextCardButton(statingDeck, cardLabel);
-        getChildren().addAll(nextCardButton, gameInfoBox, endGame);
+        Separator separator = new Separator(Orientation.VERTICAL);
+        getChildren().addAll(nextCardButton, separator, gameInfoBox);
     }
 
     /**
@@ -91,7 +98,6 @@ public class WegeBottomPane extends FlowPane {
                 button.setCard(nextCard);
             } else {
                 button.rotate();
-                cardLabel.setText(buildCardInfo(button.getCard()));
             }
         });
         WegePlayingCard initialCard = startingDeck.drawFromFront();
@@ -108,9 +114,7 @@ public class WegeBottomPane extends FlowPane {
     private String buildCardInfo(WegeCard wegeCard) {
         StringBuilder builder = new StringBuilder();
         builder.append(wegeCard.getCardType().name())
-                .append(" card")
-                .append("Orientation: ")
-                .append(wegeCard.getOrientation());
+                .append(" card");
         if (wegeCard.hasGnome()) {
             builder.append(" with a Gnome in the corner");
         } else if (wegeCard.isPathGnome()){

@@ -43,6 +43,7 @@ public class Wege extends Application {
         System.out.printf("Start the game with %d x %d playing board and %d cards%n",
                 wegeGameSetting.rows(), wegeGameSetting.cols(), wegeGameSetting.deck().size());
         Scene scene = new Scene(new WegeGameBox(wegeGameSetting));
+        primaryStage.setTitle("Wege Game v1.0");
         primaryStage.setScene(scene);
         primaryStage.show();
     }

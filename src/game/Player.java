@@ -108,6 +108,10 @@ public class Player {
         return maximumEdgesTouched;
     }
 
+    public Score getGameScore() {
+        return new Score(this);
+    }
+
     @Override
     public String toString() {
         return "{\"Player\":{"
