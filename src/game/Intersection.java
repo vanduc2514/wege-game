@@ -68,7 +68,7 @@ public class Intersection {
     /**
      * Return <code>true</code> if this intersection connect water.
      */
-    public boolean isWater() {
+    public boolean isConnectWater() {
         return !connectLand;
     }
 

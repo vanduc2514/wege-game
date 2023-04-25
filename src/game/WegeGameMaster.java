@@ -126,7 +126,7 @@ public class WegeGameMaster {
         Intersection firstContactPoint = gameBoard.findFirstConnection(card.getRow(), card.getCol());
         // If no intersection played
         if (firstContactPoint == null) return false;
-        return firstContactPoint.isConnectLand() && card.isLand(firstContactPoint) || firstContactPoint.isWater() && card.isWater(firstContactPoint);
+        return firstContactPoint.isConnectLand() && card.isLand(firstContactPoint) || firstContactPoint.isConnectWater() && card.isWater(firstContactPoint);
     }
 
     /**
@@ -296,7 +296,7 @@ public class WegeGameMaster {
         // Bridge can be travel.
         if (card.getCardType() == WegeCard.CardType.BRIDGE) return true;
         return startIntersection.isConnectLand() && card.getCardType() == WegeCard.CardType.LAND
-                || startIntersection.isWater() && card.getCardType() == WegeCard.CardType.WATER;
+                || startIntersection.isConnectWater() && card.getCardType() == WegeCard.CardType.WATER;
     }
 
 }
