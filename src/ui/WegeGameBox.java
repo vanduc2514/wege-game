@@ -64,7 +64,6 @@ public class WegeGameBox extends VBox {
         ObservableList<Node> children = getChildren();
         children.add(playingBoard);
         children.add(bottomPane);
-        bottomPane.displayPlayerScore(0);
     }
 
     private EventHandler<MouseEvent> getBoardButtonClickedHandler(WegeBottomPane bottomPane) {

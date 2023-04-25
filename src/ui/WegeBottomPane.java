@@ -19,12 +19,6 @@ public class WegeBottomPane extends FlowPane {
     /* The button display the next card for the player */
     private WegeNextCardButton nextCardButton;
 
-    /* The label to display the type of the current player. */
-    private Label playerTypeLabel;
-
-    /* The label to display the score of the current player. */
-    private Label playerScoreLabel;
-
     /**
      * Create a new bottom pane for the game Wege.
      *
@@ -52,15 +46,6 @@ public class WegeBottomPane extends FlowPane {
         return (WegePlayingCard) nextCardButton.getCard();
     }
 
-    /**
-     * Display the player score.
-     *
-     * @param score the score to be displayed.
-     */
-    public void displayPlayerScore(int score) {
-        playerScoreLabel.setText(buildPlayerScoreText(score));
-    }
-
     private EventHandler<MouseEvent> handler;
 
     Button endGame = new Button("End Game");
@@ -77,13 +62,9 @@ public class WegeBottomPane extends FlowPane {
     private void createView(WegeDeck statingDeck) {
         VBox gameInfoBox = new VBox();
         Insets labelPadding = new Insets(0, 0, 10, 0);
-        playerTypeLabel = new Label();
-        playerTypeLabel.setPadding(labelPadding);
-        playerScoreLabel = new Label();
-        playerScoreLabel.setPadding(labelPadding);
         Label cardLabel = new Label();
         cardLabel.setPadding(labelPadding);
-        gameInfoBox.getChildren().addAll(playerTypeLabel, playerScoreLabel, cardLabel);
+        gameInfoBox.getChildren().addAll(cardLabel);
         nextCardButton = createNextCardButton(statingDeck, cardLabel);
         getChildren().addAll(nextCardButton, gameInfoBox, endGame);
     }
@@ -96,39 +77,26 @@ public class WegeBottomPane extends FlowPane {
      */
     private WegeNextCardButton createNextCardButton(WegeDeck startingDeck,
                                                     Label cardLabel) {
-        WegeNextCardButton nextCardButton = new WegeNextCardButton(100, 100);
-        nextCardButton.addCardChangedListener((observable, oldCard, newCard) -> {
+        WegeNextCardButton button = new WegeNextCardButton(100, 100);
+        button.addCardChangedListener((observable, oldCard, newCard) -> {
             if (newCard != null) {
-                cardLabel.setText(buildWegeCardText(newCard));
+                cardLabel.setText(buildCardInfo(newCard));
             } else {
                 cardLabel.setText(null);
             }
         });
-        nextCardButton.addMouseClickedListener(mouseClickedEvent -> {
-            if (nextCardButton.getCard() == null) {
+        button.addMouseClickedListener(mouseClickedEvent -> {
+            if (button.getCard() == null) {
                 WegePlayingCard nextCard = startingDeck.drawFromFront();
-                nextCardButton.setCard(nextCard);
+                button.setCard(nextCard);
             } else {
-                nextCardButton.rotate();
-                cardLabel.setText(buildCardInfo(nextCardButton.getCard()));
+                button.rotate();
+                cardLabel.setText(buildCardInfo(button.getCard()));
             }
         });
         WegePlayingCard initialCard = startingDeck.drawFromFront();
-        nextCardButton.setCard(initialCard);
-        return nextCardButton;
-    }
-    /**
-     * Build the text for display the player score.
-     */
-    private String buildPlayerScoreText(int score) {
-        return "Player Score: " + score;
-    }
-
-    /**
-     * Build the text for display the card in the next button.
-     */
-    private String buildWegeCardText(WegeCard wegeCard) {
-        return "Wege Card: " + buildCardInfo(wegeCard);
+        button.setCard(initialCard);
+        return button;
     }
 
     /**
