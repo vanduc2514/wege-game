@@ -92,12 +92,12 @@ public class WegeDeck {
      */
     public static WegeDeck createSpecialDeck(int numberOfEachCard) {
         WegeDeck playingDeck = new WegeDeck();
-        playingDeck.addCardsToDeck(numberOfEachCard, cardSupplier(WegePlayingCard.CardType.LAND, GnomePos.PATH));
-        playingDeck.addCardsToDeck(numberOfEachCard, cardSupplier(WegePlayingCard.CardType.LAND, GnomePos.CORNER));
-        playingDeck.addCardsToDeck(numberOfEachCard, cardSupplier(WegePlayingCard.CardType.WATER, GnomePos.PATH));
-        playingDeck.addCardsToDeck(numberOfEachCard, cardSupplier(WegePlayingCard.CardType.LAND, GnomePos.CORNER));
-        playingDeck.addCardsToDeck(numberOfEachCard, cardSupplier(WegePlayingCard.CardType.COSSACK, null));
-        playingDeck.addCardsToDeck(numberOfEachCard, cardSupplier(WegePlayingCard.CardType.BRIDGE, null));
+        playingDeck.addCardsToDeck(numberOfEachCard, cardSupplier(WegeCard.CardType.LAND, GnomePos.PATH));
+        playingDeck.addCardsToDeck(numberOfEachCard, cardSupplier(WegeCard.CardType.LAND, GnomePos.CORNER));
+        playingDeck.addCardsToDeck(numberOfEachCard, cardSupplier(WegeCard.CardType.WATER, GnomePos.PATH));
+        playingDeck.addCardsToDeck(numberOfEachCard, cardSupplier(WegeCard.CardType.LAND, GnomePos.CORNER));
+        playingDeck.addCardsToDeck(numberOfEachCard, cardSupplier(WegeCard.CardType.COSSACK, null));
+        playingDeck.addCardsToDeck(numberOfEachCard, cardSupplier(WegeCard.CardType.BRIDGE, null));
         playingDeck.shuffle();
         return playingDeck;
     }
@@ -147,14 +147,14 @@ public class WegeDeck {
      */
     private static void insertStandardCards(WegeDeck wegeDeck) {
         // Gnome cards needs to be at the top for fast removal.
-        wegeDeck.addCardsToDeck(3, cardSupplier(WegePlayingCard.CardType.LAND, GnomePos.PATH));
-        wegeDeck.addCardsToDeck(2, cardSupplier(WegePlayingCard.CardType.LAND, GnomePos.CORNER));
-        wegeDeck.addCardsToDeck(3, cardSupplier(WegePlayingCard.CardType.WATER, GnomePos.PATH));
-        wegeDeck.addCardsToDeck(2, cardSupplier(WegePlayingCard.CardType.LAND, GnomePos.CORNER));
-        wegeDeck.addCardsToDeck(12, cardSupplier(WegePlayingCard.CardType.WATER, null));
-        wegeDeck.addCardsToDeck(12, cardSupplier(WegePlayingCard.CardType.LAND, null));
-        wegeDeck.addCardsToDeck(3, cardSupplier(WegePlayingCard.CardType.COSSACK, null));
-        wegeDeck.addCardsToDeck(3, cardSupplier(WegePlayingCard.CardType.BRIDGE, null));
+        wegeDeck.addCardsToDeck(3, cardSupplier(WegeCard.CardType.LAND, GnomePos.PATH));
+        wegeDeck.addCardsToDeck(2, cardSupplier(WegeCard.CardType.LAND, GnomePos.CORNER));
+        wegeDeck.addCardsToDeck(3, cardSupplier(WegeCard.CardType.WATER, GnomePos.PATH));
+        wegeDeck.addCardsToDeck(2, cardSupplier(WegeCard.CardType.LAND, GnomePos.CORNER));
+        wegeDeck.addCardsToDeck(12, cardSupplier(WegeCard.CardType.WATER, null));
+        wegeDeck.addCardsToDeck(12, cardSupplier(WegeCard.CardType.LAND, null));
+        wegeDeck.addCardsToDeck(3, cardSupplier(WegeCard.CardType.COSSACK, null));
+        wegeDeck.addCardsToDeck(3, cardSupplier(WegeCard.CardType.BRIDGE, null));
     }
 
     /**
@@ -176,10 +176,10 @@ public class WegeDeck {
             }
             WegePlayingCard cardInDeck = deckIterator.next();
             if (cardInDeck.hasGnome()) {
-                if (cardInDeck.getCardType() == WegePlayingCard.CardType.LAND) {
+                if (cardInDeck.getCardType() == WegeCard.CardType.LAND) {
                     landCardsRemoved++;
                     deckIterator.remove();
-                } else if (cardInDeck.getCardType() == WegePlayingCard.CardType.WATER) {
+                } else if (cardInDeck.getCardType() == WegeCard.CardType.WATER) {
                     waterCardsRemoved++;
                     deckIterator.remove();
                 }
@@ -194,8 +194,8 @@ public class WegeDeck {
      * @param numberOfCards the number of each Land and Water cards.
      */
     private static void addWaterAndLandCardsToDeck(WegeDeck wegeDeck, int numberOfCards) {
-        wegeDeck.addCardsToDeck(numberOfCards, cardSupplier(WegePlayingCard.CardType.WATER, null));
-        wegeDeck.addCardsToDeck(numberOfCards, cardSupplier(WegePlayingCard.CardType.LAND, null));
+        wegeDeck.addCardsToDeck(numberOfCards, cardSupplier(WegeCard.CardType.WATER, null));
+        wegeDeck.addCardsToDeck(numberOfCards, cardSupplier(WegeCard.CardType.LAND, null));
     }
 
     /**
@@ -205,7 +205,7 @@ public class WegeDeck {
      * @param gnomePos the position of Gnome on the card.
      * @return a {@link Supplier} which supply the card based on cardType and gnomePos
      */
-    private static Supplier<WegePlayingCard> cardSupplier(WegePlayingCard.CardType cardType, GnomePos gnomePos) {
+    private static Supplier<WegePlayingCard> cardSupplier(WegeCard.CardType cardType, GnomePos gnomePos) {
         if (gnomePos == null) return () -> new WegePlayingCard(cardType, false, false);
         return switch (gnomePos) {
             case CORNER -> () -> new WegePlayingCard(cardType, true, false);

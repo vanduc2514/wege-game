@@ -1,7 +1,6 @@
 package game;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -12,6 +11,8 @@ public class WegeCLI {
 
     /* Only accept maximum two-digit positive number start from 1. */
     private static final Pattern VALID_POSITIVE_INTEGER_REGEX = Pattern.compile("^[1-9]$");
+
+    private WegeCLI() {}
 
     /**
      * Validate each of arguments given to this application. Each of them should be
@@ -24,9 +25,9 @@ public class WegeCLI {
         if (applicationArguments.isEmpty()) return true;
         for (String argument : applicationArguments) {
             if (!VALID_POSITIVE_INTEGER_REGEX.matcher(argument).matches()) {
-                String errorMessageFormat = "The application arguments %s is not valid!. " +
+                String errorMessageFormat = "The application arguments is not valid!. " +
                         "Please use a realistic number.";
-                System.out.printf(errorMessageFormat + "%n", Arrays.toString(applicationArguments.toArray()));
+                System.err.println(errorMessageFormat);
                 return false;
             }
         }
