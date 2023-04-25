@@ -2,10 +2,7 @@ package game;
 
 import javafx.geometry.Pos;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * The data structure (model) for the playing board of the game Wege.
@@ -86,14 +83,19 @@ public class WegePlayingBoard {
      * when it's placed on the game board.
      */
     public Intersection findFirstConnection(int row, int col) {
+        int pointContact = 0;
+        Intersection firstFound = null;
         for (int x = row; x <= row + 1; x++) {
             for (int y = col; y <= col + 1; y++) {
                 Intersection intersection = intersectionGrid[x][y];
                 if (intersection != null) {
-                    return intersection;
+                    firstFound = intersection;
+                    pointContact++;
                 }
             }
         }
+        // At least two points need to connect
+        if (pointContact >= 2) return firstFound;
         return null;
     }
 
@@ -205,6 +207,40 @@ public class WegePlayingBoard {
     }
 
     /**
+     * Get a snapshot of the internal game board structure.
+     * Use only for unit test.
+     *
+     * @return a copy array of {@link #cardsOnBoard}
+     */
+    WegePlayingCard[][] getCardsOnBoard() {
+        return copy2DArray(cardsOnBoard);
+    }
+
+    /**
+     * Get a snapshot of the internal intersection grid structure.
+     * Use only for unit test.
+     *
+     * @return a copy array of {@link #intersectionGrid}
+     */
+    Intersection[][] getIntersectionGrid() {
+        return copy2DArray(intersectionGrid);
+    }
+
+    /**
+     * Create an intersection at the given coordinate.
+     * Use only for unit test.
+     *
+     * @param x x coordinate
+     * @param y y coordinate
+     * @return the created intersection.
+     */
+    Intersection createIntersection(int x, int y) {
+        Intersection intersection = new Intersection(x, y);
+        intersectionGrid[x][y] = intersection;
+        return intersection;
+    }
+
+    /**
      * Get intersections that associate with a card on the game board.
      * If there is no intersection associated before, initialize a new intersection
      * and add it to the result list.
@@ -232,7 +268,7 @@ public class WegePlayingBoard {
     /**
      * Get the coordinate within the game board boundary.
      */
-    private static int inBoundary(int coordinate, int boundary) {
+    private int inBoundary(int coordinate, int boundary) {
         // If the given coordinate is out of boundary,
         // return the nearest coordinate.
         if (boundary == 0) return Math.max(coordinate, boundary);
@@ -240,17 +276,15 @@ public class WegePlayingBoard {
     }
 
     /**
-     * Reset all the intersections state on the game grid.
+     * Copy a 2 dimension array.
+     *
+     * @param source the source array.
+     * @return the copy array.
+     * @param <T> type of the source array.
      */
-    public void resetIntersectionGrid() {
-        for (int x = 0; x <= maxX; x++) {
-            for (int y = 0; y <= maxY; y++) {
-                Intersection intersection = intersectionGrid[x][y];
-                if (intersection != null) {
-                    intersection.setVisited(false);
-                    intersection.setCompleted(false);
-                }
-            }
-        }
+    private <T> T[][] copy2DArray(T[][] source) {
+        return Arrays.stream(source)
+                .map(row -> Arrays.stream(row).toArray(size -> row.clone()))
+                .toArray(size -> source.clone());
     }
 }

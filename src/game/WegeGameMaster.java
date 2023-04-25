@@ -93,7 +93,6 @@ public class WegeGameMaster {
             Player player = getAssociatePlayer(firstNotCompleted);
             travelAndUpdate(firstNotCompleted, player);
         }
-        gameBoard.resetIntersectionGrid();
         return List.of(landPlayer, waterPlayer);
     }
 

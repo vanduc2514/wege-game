@@ -11,7 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static helper.TestUtil.countCardWithType;
-import static helper.TestUtil.createWegeCard;
+import static helper.TestUtil.createCardWithoutGnome;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
@@ -38,10 +38,10 @@ class WegeDeckTest {
     void init() {
         stubPlayingCards = new LinkedList<>();
         for (int i = 0; i < LAND_CARD_AMOUNT; i++) {
-            stubPlayingCards.add(createWegeCard(WegeCard.CardType.LAND));
+            stubPlayingCards.add(createCardWithoutGnome(WegeCard.CardType.LAND));
         }
         for (int i = 0; i < WATER_CARD_AMOUNT; i++) {
-            stubPlayingCards.add(createWegeCard(WegeCard.CardType.WATER));
+            stubPlayingCards.add(createCardWithoutGnome(WegeCard.CardType.WATER));
         }
         wegeDeck = new WegeDeck(stubPlayingCards);
     }
@@ -67,7 +67,7 @@ class WegeDeckTest {
         // Given
         int expectedAmount = counter.apply(typeOfCardToAdd) + numberOfCardToAdd;
         // When
-        wegeDeck.addCardsToDeck(numberOfCardToAdd, () -> createWegeCard(typeOfCardToAdd));
+        wegeDeck.addCardsToDeck(numberOfCardToAdd, () -> createCardWithoutGnome(typeOfCardToAdd));
         // Then the size should increase
         assertEquals(LAND_CARD_AMOUNT + WATER_CARD_AMOUNT + numberOfCardToAdd, wegeDeck.size());
         // Then the amount of card should increase.

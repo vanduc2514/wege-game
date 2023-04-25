@@ -13,12 +13,41 @@ public class TestUtil {
     private TestUtil() {}
 
     /**
-     * Create the Wege Card base on a given type
+     * Create the card to place it at the given location on the game board.
+     *
+     * @param cardType the type of the card.
+     * @param row the row on the game board.
+     * @param col the column on the game board.
+     * @return a new card to place on the game board.
+     */
+    public static WegePlayingCard createCardWithoutGnome(WegeCard.CardType cardType, int row, int col) {
+        WegePlayingCard landCard = createCardWithoutGnome(cardType);
+        landCard.setRow(row);
+        landCard.setCol(col);
+        return landCard;
+    }
+
+    /**
+     * Create the land card to place it at the given location on the game board.
+     *
+     * @param row the row on the game board.
+     * @param col the column on the game board.
+     * @return a new land card
+     */
+    public static WegePlayingCard createLandCard(int row, int col) {
+        WegePlayingCard landCard = createCardWithoutGnome(WegeCard.CardType.LAND);
+        landCard.setRow(row);
+        landCard.setCol(col);
+        return landCard;
+    }
+
+    /**
+     * Create the Wege Card base on a given type, this card does not have a gnome on it.
      *
      * @param cardType the type of this card.
      * @return a new Wege card.
      */
-    public static WegePlayingCard createWegeCard(WegeCard.CardType cardType) {
+    public static WegePlayingCard createCardWithoutGnome(WegeCard.CardType cardType) {
         return new WegePlayingCard(cardType, false, false);
     }
 
