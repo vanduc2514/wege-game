@@ -1,4 +1,4 @@
-package helper;
+package game;
 
 import game.WegeCard;
 import game.WegeDeck;

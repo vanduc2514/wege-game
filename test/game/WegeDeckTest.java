@@ -10,8 +10,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.util.LinkedList;
 import java.util.List;
 
-import static helper.TestUtil.countCardWithType;
-import static helper.TestUtil.createCardWithoutGnome;
+import static game.TestUtil.countCardWithType;
+import static game.TestUtil.createCardWithoutGnome;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 

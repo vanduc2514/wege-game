@@ -11,8 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
-import static helper.TestUtil.countCardWithCondition;
-import static helper.TestUtil.matchWegeCard;
+import static game.TestUtil.countCardWithCondition;
+import static game.TestUtil.matchWegeCard;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DisplayName("Parameterized Test cases for card generation of the Deck")

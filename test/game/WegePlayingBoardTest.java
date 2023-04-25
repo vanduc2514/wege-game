@@ -10,8 +10,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.List;
 
-import static helper.TestUtil.createCardWithoutGnome;
-import static helper.TestUtil.createLandCard;
+import static game.TestUtil.createCardWithoutGnome;
+import static game.TestUtil.createLandCard;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("Test cases of the functionality for the game board")
