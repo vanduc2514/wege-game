@@ -2,29 +2,27 @@ package game;
 
 import javafx.geometry.Pos;
 
-import java.util.*;
-import java.util.function.Function;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * The data structure (model) for the playing board of the game Wege.
  */
 public class WegePlayingBoard {
 
-    /* Maximum cards that can be placed on the game board. */
-    private final int maximumCards;
-
     /* 2 dimension array that represent the current cards played on the game board. */
     private final WegePlayingCard[][] cardsOnBoard;
-
-    private final int maxX;
-
-    private final int maxY;
 
     /* 2 dimension array that represent intersections where cards connect on the game board. */
     private final Intersection[][] intersectionGrid;
 
-    /* The number of cards had been played so far. */
-    private int cardsPlayed;
+    /* The maximum x of the intersection grid on the game board. */
+    private final int maxX;
+
+    /* The maximum y of the intersection grid on the game board. */
+    private final int maxY;
 
     /**
      * Create a new game board for the game Wege.
@@ -33,7 +31,6 @@ public class WegePlayingBoard {
      * @param cols the number of columns for this board.
      */
     public WegePlayingBoard(int rows, int cols) {
-        this.maximumCards = rows * cols;
         this.cardsOnBoard = new WegePlayingCard[rows][cols];
         this.intersectionGrid = new Intersection[rows + 1][cols + 1];
         this.maxX = intersectionGrid.length - 1;
@@ -41,8 +38,9 @@ public class WegePlayingBoard {
     }
 
     /**
-     * Place a card on the game board at the given location. This update
-     * the internal state of the board.
+     * Place a card on the game board at the given location and create
+     * the intersection surrounds it, used for checking the connection point
+     * of adjacent cards.
      * 
      * @param card the Wege card to be placed.
      */
@@ -50,14 +48,13 @@ public class WegePlayingBoard {
         int row = card.getRow();
         int col = card.getCol();
         cardsOnBoard[row][col] = card;
-        List<Intersection> surroundIntersections = getSurroundIntersections(row, col);
+        List<Intersection> surroundIntersections = getAssociateIntersections(card);
         for (Intersection intersection : surroundIntersections) {
-            intersection.setLand(card.isLand(intersection));
+            intersection.connectLand(card.isLand(intersection));
             if (card.isGnome(intersection)) {
                 intersection.increaseFacingGnomeCount();
             }
         }
-        cardsPlayed++;
     }
 
     /**
@@ -77,16 +74,18 @@ public class WegePlayingBoard {
     }
 
     /**
-     * Check if the playing board is filled up with Wege cards.
+     * Find the first intersection which can be used for card connection
+     * around a location on the game board.
      *
-     * @return <code>true</code> if the board is filled up.
-     * Otherwise, return <code>false</code>.
+     * @param row the row on the playing board.
+     * @param col the column on the playing board.
+     * @return the first intersection which connect to an existing card on
+     * the game board. If the location does not have any adjacent cards,
+     * return <code>null</code>
+     * @see #placeCardOnBoard(WegePlayingCard) associate intersection to a card
+     * when it's placed on the game board.
      */
-    public boolean isFilledUp() {
-        return cardsPlayed == maximumCards;
-    }
-
-    public Intersection findFirstIntersection(int row, int col) {
+    public Intersection findFirstConnection(int row, int col) {
         for (int x = row; x <= row + 1; x++) {
             for (int y = col; y <= col + 1; y++) {
                 Intersection intersection = intersectionGrid[x][y];
@@ -98,7 +97,13 @@ public class WegePlayingBoard {
         return null;
     }
 
-    // Return null if all is completed.
+    /**
+     * Find the first intersection in the grid which is not completed for collecting
+     * player statistic.
+     *
+     * @return the first not completed intersection or <code>null</code> if all
+     * intersections are completed.
+     */
     public Intersection findFirstNotCompletedIntersection() {
         for (int x = 0; x < intersectionGrid.length; x++) {
             for (int y = 0; y < intersectionGrid[x].length; y++) {
@@ -114,13 +119,11 @@ public class WegePlayingBoard {
     /**
      * Find {@link Pos#TOP_LEFT}, {@link Pos#TOP_RIGHT},
      * {@link Pos#BOTTOM_LEFT}, {@link Pos#BOTTOM_RIGHT}
-     * intersections that presented on the intersection grid from
-     * a location on the playing board.
+     * intersections which surround a card on the game board.
      *
-     * @param x the x of the card on the playing board.
-     * @param y the column of the card on the playing board.
+     * @param card the card played on the game board.
      * @return intersections surrounding that location or an empty list
-     * if the intersections have not been played.
+     * if the card is not being played before.
      */
     public List<Intersection> findSurroundIntersections(WegePlayingCard card) {
         List<Intersection> intersections = new ArrayList<>();
@@ -133,6 +136,13 @@ public class WegePlayingBoard {
         return intersections;
     }
 
+    /**
+     * Find all cards that made up this intersection. Card at corner and edge
+     * of the game board is still considered as valid.
+     *
+     * @param intersection the intersection.
+     * @return all surrounds card.
+     */
     public List<WegePlayingCard> findSurroundCards(Intersection intersection) {
         Set<WegePlayingCard> cards = new HashSet<>();
         int x = intersection.getX();
@@ -146,9 +156,16 @@ public class WegePlayingBoard {
         return new ArrayList<>(cards);
     }
 
-    public Intersection findOppositePoint(Intersection startPoint, Pos direction) {
-        int x = startPoint.getX();
-        int y = startPoint.getY();
+    /**
+     * Find the opposite intersection of an intersection based on a direction.
+     *
+     * @param intersection an intersection
+     * @param direction the direction to find the opposite intersection.
+     * @return the opposite diagonal intersection.
+     */
+    public Intersection findOppositeIntersection(Intersection intersection, Pos direction) {
+        int x = intersection.getX();
+        int y = intersection.getY();
         return switch (direction) {
             case TOP_LEFT -> intersectionGrid
                     [inBoundary(x - 1, 0)]
@@ -166,6 +183,14 @@ public class WegePlayingBoard {
         };
     }
 
+    /**
+     * Count how many edges that an intersection touch on the game board.
+     * It could be Left corner, Right corner, Bottom corner and Top corner.
+     *
+     * @param intersections a list of intersection which forms a trail
+     *                      among cards.
+     * @return the number edges touched from the list of intersection.
+     */
     public int countEdgeTouch(List<Intersection> intersections) {
         Set<Pos> edges = new HashSet<>();
         for (Intersection intersection : intersections) {
@@ -179,7 +204,17 @@ public class WegePlayingBoard {
         return edges.size();
     }
 
-    private List<Intersection> getSurroundIntersections(int row, int col) {
+    /**
+     * Get intersections that associate with a card on the game board.
+     * If there is no intersection associated before, initialize a new intersection
+     * and add it to the result list.
+     *
+     * @param card the card on the game board.
+     * @return the surround intersections that associate to a card.
+     */
+    private List<Intersection> getAssociateIntersections(WegePlayingCard card) {
+        int row = card.getRow();
+        int col = card.getCol();
         List<Intersection> intersections = new ArrayList<>();
         for (int x = row; x <= row + 1; x++) {
             for (int y = col; y <= col + 1; y++) {
@@ -194,7 +229,6 @@ public class WegePlayingBoard {
         return intersections;
     }
 
-
     /**
      * Get the coordinate within the game board boundary.
      */
@@ -205,4 +239,18 @@ public class WegePlayingBoard {
         return Math.min(coordinate, boundary);
     }
 
+    /**
+     * Reset all the intersections state on the game grid.
+     */
+    public void resetIntersectionGrid() {
+        for (int x = 0; x <= maxX; x++) {
+            for (int y = 0; y <= maxY; y++) {
+                Intersection intersection = intersectionGrid[x][y];
+                if (intersection != null) {
+                    intersection.setVisited(false);
+                    intersection.setCompleted(false);
+                }
+            }
+        }
+    }
 }

@@ -7,17 +7,19 @@ import javafx.scene.Node;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 
-import java.util.List;
-
 /**
  * The view of a Wege game and UI interactions for the game.
  */
 public class WegeGameBox extends VBox {
 
-    /* Track players of a Wege Game. */
-//    private final WegeGameMaster wegeGameMaster;
+    /* Maximum cards that can be placed on the game board. */
+    private final int maximumCards;
 
-    WegeGameManager wegeGameManager;
+    /* The game master for the Game Wege. He helps checking the game rule and collect player statistic */
+    private final WegeGameMaster wegeGameMaster;
+
+    /* The number of cards had been played so far. */
+    private int cardsPlayed;
 
     /**
      * Create a new Wege Game.
@@ -27,9 +29,9 @@ public class WegeGameBox extends VBox {
      * @param wegeDeck the dek contains wege cards for this game.
      */
     public WegeGameBox(int rows, int cols, WegeDeck wegeDeck) {
-//        wegeGameMaster = new WegeGameMaster(rows, cols);
+        this.maximumCards = rows * cols;
         WegePlayingBoard wegePlayingBoard = new WegePlayingBoard(rows, cols);
-        wegeGameManager = new WegeGameManager(wegePlayingBoard);
+        wegeGameMaster = new WegeGameMaster(wegePlayingBoard);
         createView(rows, cols, wegeDeck);
     }
 
@@ -53,7 +55,7 @@ public class WegeGameBox extends VBox {
         /* The bottom pane of this box */
         WegeBottomPane bottomPane = new WegeBottomPane(startingDeck);
         bottomPane.setEndGameEvent(event -> {
-            wegeGameManager.collectPlayerStatistic().forEach(System.out::println);
+            wegeGameMaster.collectPlayerStatistic().forEach(System.out::println);
         });
         /* The top playing board of this box */
         WegePlayingBoardPane playingBoard = new WegePlayingBoardPane(rows, cols);
@@ -67,8 +69,8 @@ public class WegeGameBox extends VBox {
 
     private EventHandler<MouseEvent> getBoardButtonClickedHandler(WegeBottomPane bottomPane) {
         return mouseClickedEvent -> {
-            if (wegeGameManager.isGameEnded()) {
-                wegeGameManager.collectPlayerStatistic()
+            if (isGameEnded()) {
+                wegeGameMaster.collectPlayerStatistic()
                         .forEach(System.out::println);
                 return;
             }
@@ -80,13 +82,23 @@ public class WegeGameBox extends VBox {
             nextCard.setRow(row);
             nextCard.setCol(col);
             if (boardButton.getCard() == null
-                    && wegeGameManager.tryPlaceCard(nextCard)) {
+                    && wegeGameMaster.tryPlaceCard(nextCard)) {
                 placeCard(boardButton, bottomPane);
             } else if (boardButton.getCard() != null
-                    && wegeGameManager.trySwapCard(nextCard)){
+                    && wegeGameMaster.trySwapCard(nextCard)){
                 swapCard(boardButton, bottomPane);
             }
         };
+    }
+
+    /**
+     * Check if the game is ended when all cards have been played on the board.
+     *
+     * @return <code>true</code> if the board is filled up with all Wege card.
+     * Otherwise, return <code>false</code>.
+     */
+    private boolean isGameEnded() {
+        return cardsPlayed == maximumCards;
     }
 
     /**
@@ -98,6 +110,7 @@ public class WegeGameBox extends VBox {
     private void placeCard(WegeButton boardButton, WegeBottomPane bottomPane) {
         setCardOnBoard(boardButton, bottomPane.getNextCard());
         bottomPane.setNextCard(null);
+        cardsPlayed++;
     }
 
     /**
