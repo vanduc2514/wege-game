@@ -1,15 +1,13 @@
 import game.WegeGameSetting;
-import ui.WegeGameBox;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import ui.WegeGameBox;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
-import static game.WegeGameSetting.CLIHelper.*;
+import static game.WegeCLI.*;
 
 /**
  * Wege game application
