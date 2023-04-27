@@ -26,3 +26,29 @@ cd bin
 ```shell
 java Wege
 ```
+
+## Unit Test
+
+1. Download JUnit Test Console
+
+```shell
+curl https://repo1.maven.org/maven2/org/junit/platform/junit-platform-console-standalone/1.9.2/junit-platform-console-standalone-1.9.2.jar -o junit-platform-console-standalone-1.9.2.jar 
+```
+
+2. Compile test classes
+
+```shell
+javac -cp target:junit-platform-console-standalone-1.9.2.jar -d out test/game/*.java src/game/*.java
+```
+
+3. Run JUnit Tests
+
+```shell
+java -jar junit-platform-console-standalone-1.9.2.jar --class-path out \
+  --select-class game.CardGenerationTest \
+  --select-class game.WegeCLITest \
+  --select-class game.WegeDeckTest \
+  --select-class game.WegeGameSettingTest \
+  --select-class game.WegePlayingBoardTest \
+  --select-class game.WegeGameMasterTest
+```
